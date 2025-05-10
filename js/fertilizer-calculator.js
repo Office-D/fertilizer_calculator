@@ -295,18 +295,34 @@ function setupEventListeners() {
     if (managePresetsBtn) {
         managePresetsBtn.addEventListener('click', openPresetsModal);
     }
-    
-    // モーダルの閉じるボタン
-    const closeModalBtn = document.querySelector('.close-modal');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', closePresetsModal);
+
+    // 使い方ボタン
+    const helpBtn = document.getElementById('helpButton');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', openHelpModal);
     }
+
+    // モーダルの閉じるボタン
+    const closeModalBtns = document.querySelectorAll('.close-modal');
+    closeModalBtns.forEach(btn => {
+        if (btn.classList.contains('help-close')) {
+            btn.addEventListener('click', closeHelpModal);
+        } else {
+            btn.addEventListener('click', closePresetsModal);
+        }
+    });
     
     // モーダル外をクリックしたら閉じる
     window.addEventListener('click', function(event) {
-        const modal = document.getElementById('presetsModal');
-        if (event.target === modal) {
+        const presetsModal = document.getElementById('presetsModal');
+        const helpModal = document.getElementById('helpModal');
+
+        if (event.target === presetsModal) {
             closePresetsModal();
+        }
+
+        if (event.target === helpModal) {
+            closeHelpModal();
         }
     });
     
@@ -320,9 +336,15 @@ function setupEventListeners() {
     document.addEventListener('keydown', function(e) {
         // ESCキーでモーダルを閉じる
         if (e.key === 'Escape') {
-            const modal = document.getElementById('presetsModal');
-            if (modal && modal.style.display === 'block') {
+            const presetsModal = document.getElementById('presetsModal');
+            const helpModal = document.getElementById('helpModal');
+
+            if (presetsModal && presetsModal.style.display === 'block') {
                 closePresetsModal();
+            }
+
+            if (helpModal && helpModal.style.display === 'block') {
+                closeHelpModal();
             }
         }
     });
@@ -1119,10 +1141,19 @@ function openPresetsModal() {
     const modal = document.getElementById('presetsModal');
     modal.style.display = 'block';
     modal.setAttribute('aria-hidden', 'false');
-    
+
+    // モーダル内のヘッダーに黒色を強制的に設定
+    const modalTitles = modal.querySelectorAll('h2, h3');
+    modalTitles.forEach(title => {
+        title.style.color = 'black';
+    });
+
+    // モーダル表示前に内容を更新
+    renderPresetLists();
+
     // モーダルを開いたときに最初の要素にフォーカスを移動
     const closeButton = modal.querySelector('.close-modal');
-    
+
     // アニメーションのために少し遅延させる
     setTimeout(() => {
         modal.classList.add('show');
@@ -1141,15 +1172,66 @@ function closePresetsModal() {
     const modal = document.getElementById('presetsModal');
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
-    
+
     // アニメーションの後にモーダルを非表示にする
     setTimeout(() => {
         modal.style.display = 'none';
-        
+
         // フォーカスを元の「プリセット管理」ボタンに戻す
         const presetManageBtn = document.querySelector('.manage-presets-btn');
         if (presetManageBtn) {
             presetManageBtn.focus();
+        }
+    }, 300);
+}
+
+// 使い方モーダルを開く
+function openHelpModal() {
+    const modal = document.getElementById('helpModal');
+    modal.style.display = 'block';
+    modal.setAttribute('aria-hidden', 'false');
+
+    // モーダル内のテキストに黒色を強制的に設定
+    const modalTexts = modal.querySelectorAll('h2, h3, h4, p, li, strong');
+    modalTexts.forEach(text => {
+        text.style.color = 'black';
+    });
+
+    // リストマーカーを調整
+    const listElements = modal.querySelectorAll('li');
+    listElements.forEach(li => {
+        li.style.marginLeft = '15px';
+        li.style.position = 'relative';
+        li.style.listStylePosition = 'outside';
+    });
+
+    // モーダルを開いたときに最初の要素にフォーカスを移動
+    const closeButton = modal.querySelector('.help-close');
+
+    // アニメーションのために少し遅延させる
+    setTimeout(() => {
+        modal.classList.add('show');
+        // フォーカストラップのためにフォーカスを移動
+        if (closeButton) {
+            closeButton.focus();
+        }
+    }, 10);
+}
+
+// 使い方モーダルを閉じる
+function closeHelpModal() {
+    const modal = document.getElementById('helpModal');
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+
+    // アニメーションの後にモーダルを非表示にする
+    setTimeout(() => {
+        modal.style.display = 'none';
+
+        // フォーカスを元の「使い方」ボタンに戻す
+        const helpBtn = document.getElementById('helpButton');
+        if (helpBtn) {
+            helpBtn.focus();
         }
     }, 300);
 }
@@ -1238,116 +1320,134 @@ function renderPresets() {
 
 // プリセットリストを表示（管理モーダル内）
 function renderPresetLists() {
+    console.log("renderPresetLists called");
+
     // デフォルトプリセットリストを表示
     const defaultList = document.getElementById('defaultPresetList');
     if (defaultList) {
         defaultList.innerHTML = '';
-        
+
         defaultPresets.forEach(preset => {
+            // 各プリセットの内容をログ出力（デバッグ用）
+            console.log(`Rendering preset: ${preset.name}, N:${preset.nitrogen}, P:${preset.phosphorus}, K:${preset.potassium}`);
+
+            // リストアイテム作成
             const item = document.createElement('div');
             item.className = 'preset-list-item';
-            
-            const label = document.createElement('label');
-            label.className = 'preset-visibility-label';
-            
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.justifyContent = 'space-between';
+
+            // チェックボックス部分
+            const checkboxContainer = document.createElement('div');
+            checkboxContainer.style.width = '40px';
+
+            // チェックボックス
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = preset.isVisible;
             checkbox.id = `preset-${preset.id}`;
-            checkbox.setAttribute('aria-labelledby', `preset-name-${preset.id}`);
-            
+            checkbox.style.marginRight = '10px';
+            checkbox.style.transform = 'scale(1.2)';
+
             checkbox.onchange = function() {
                 preset.isVisible = checkbox.checked;
-                
-                // ローカルストレージに保存
                 localStorage.setItem('defaultPresets', JSON.stringify(defaultPresets));
-                
-                // プリセットリストを更新
                 renderPresets();
-                
-                // スクリーンリーダー用の状態通知
-                const status = document.createElement('div');
-                status.setAttribute('role', 'status');
-                status.className = 'visually-hidden';
-                status.textContent = `${preset.name}を${checkbox.checked ? '表示' : '非表示'}に設定しました`;
-                document.body.appendChild(status);
-                
-                // 一定時間後に通知を削除
-                setTimeout(() => {
-                    document.body.removeChild(status);
-                }, 1000);
+
+                alert(`${preset.name}を${checkbox.checked ? '表示' : '非表示'}に設定しました`);
             };
-            
-            const displayName = document.createElement('span');
-            displayName.textContent = getPresetDisplayName(preset);
-            displayName.id = `preset-name-${preset.id}`;
-            
-            label.appendChild(checkbox);
-            label.appendChild(displayName);
-            
-            item.appendChild(label);
+
+            checkboxContainer.appendChild(checkbox);
+
+            // 肥料名とNPK値を含むテキストコンテナ
+            const textContainer = document.createElement('div');
+            textContainer.style.flexGrow = '1';
+            textContainer.style.textAlign = 'left';
+            textContainer.style.whiteSpace = 'nowrap';
+            textContainer.style.overflow = 'hidden';
+            textContainer.style.textOverflow = 'ellipsis';
+
+            // 一行のテキストとして表示
+            textContainer.textContent = `${preset.name} (${preset.nitrogen}-${preset.phosphorus}-${preset.potassium})`;
+            textContainer.style.color = 'black';
+            textContainer.style.fontWeight = 'normal';
+
+            item.appendChild(checkboxContainer);
+            item.appendChild(textContainer);
             defaultList.appendChild(item);
         });
+    } else {
+        console.error("defaultList element not found");
     }
     
     // ユーザープリセットリストを表示
     const userList = document.getElementById('userPresetList');
     if (userList) {
         userList.innerHTML = '';
-        
+
         if (userPresets.length === 0) {
-            userList.innerHTML = '<p>まだカスタムプリセットがありません</p>';
+            userList.innerHTML = '<p style="color: black;">まだカスタムプリセットがありません</p>';
         } else {
             userPresets.forEach(preset => {
+                console.log(`Rendering user preset: ${preset.name}`);
+
+                // リストアイテム作成
                 const item = document.createElement('div');
                 item.className = 'preset-list-item';
-                
-                const name = document.createElement('div');
-                name.textContent = getPresetDisplayName(preset);
-                
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+                item.style.justifyContent = 'space-between';
+
+                // テキスト表示部分
+                const textContainer = document.createElement('div');
+                textContainer.style.flexGrow = '1';
+                textContainer.style.textAlign = 'left';
+                textContainer.style.whiteSpace = 'nowrap';
+                textContainer.style.overflow = 'hidden';
+                textContainer.style.textOverflow = 'ellipsis';
+
+                // 一行のテキストとして表示
+                textContainer.textContent = `${preset.name} (${preset.nitrogen}-${preset.phosphorus}-${preset.potassium})`;
+                textContainer.style.color = 'black';
+                textContainer.style.fontWeight = 'normal';
+
+                // 削除ボタン部分
                 const actions = document.createElement('div');
-                actions.className = 'preset-actions';
-                
+                actions.style.display = 'flex';
+                actions.style.justifyContent = 'flex-end';
+                actions.style.width = '30%';
+
                 const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'delete-preset-btn';
                 deleteBtn.textContent = '削除';
-                deleteBtn.setAttribute('aria-label', `${preset.name}を削除`);
+                deleteBtn.style.backgroundColor = '#e53935';
+                deleteBtn.style.color = 'white';
+                deleteBtn.style.border = 'none';
+                deleteBtn.style.borderRadius = '4px';
+                deleteBtn.style.padding = '5px 10px';
+
                 deleteBtn.onclick = function() {
                     if (confirm(`${preset.name}を削除してもよろしいですか？`)) {
-                        // プリセットを削除
                         const index = userPresets.findIndex(p => p.name === preset.name);
                         if (index !== -1) {
                             userPresets.splice(index, 1);
-                            
-                            // ローカルストレージに保存
                             localStorage.setItem('userPresets', JSON.stringify(userPresets));
-                            
-                            // プリセットリストを更新
                             renderPresetLists();
                             renderPresets();
-                            
-                            // スクリーンリーダー用の状態通知
-                            const status = document.createElement('div');
-                            status.setAttribute('role', 'status');
-                            status.className = 'visually-hidden';
-                            status.textContent = `${preset.name}が削除されました`;
-                            document.body.appendChild(status);
-                            
-                            // 一定時間後に通知を削除
-                            setTimeout(() => {
-                                document.body.removeChild(status);
-                            }, 1000);
+                            alert(`${preset.name}が削除されました`);
                         }
                     }
                 };
-                
+
                 actions.appendChild(deleteBtn);
-                
-                item.appendChild(name);
+
+                item.appendChild(textContainer);
                 item.appendChild(actions);
                 userList.appendChild(item);
             });
         }
+    } else {
+        console.error("userList element not found");
     }
 }
 
@@ -1438,11 +1538,11 @@ function toggleAdvancedFields() {
     
     if (advancedSection.style.display === 'none' || getComputedStyle(advancedSection).display === 'none') {
         advancedSection.style.display = 'block';
-        toggleBtn.textContent = '詳細項目を隠す';
+        toggleBtn.textContent = '微量要素項目を隠す';
         toggleBtn.setAttribute('aria-expanded', 'true');
     } else {
         advancedSection.style.display = 'none';
-        toggleBtn.textContent = '詳細項目を表示する';
+        toggleBtn.textContent = '微量要素項目を表示する (Ca, Mg, S, Fe, Mn, Zn, B)';
         toggleBtn.setAttribute('aria-expanded', 'false');
     }
 }
@@ -1450,19 +1550,19 @@ function toggleAdvancedFields() {
 // プリセットの表示名を生成
 function getPresetDisplayName(preset) {
     let name = preset.name;
-    
+
     // NPK値を追加
     const npk = `(${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
-    
+
     // NPK以外の主要な成分を追加
     const extras = [];
     if (preset.calcium > 0) extras.push(`Ca${preset.calcium}`);
     if (preset.magnesium > 0) extras.push(`Mg${preset.magnesium}`);
     if (preset.sulfur > 0) extras.push(`S${preset.sulfur}`);
-    
+
     // 追加成分がある場合は追加
     const extrasText = extras.length > 0 ? '+' + extras.join(',') : '';
-    
+
     return `${name} ${npk}${extrasText})`;
 }
 

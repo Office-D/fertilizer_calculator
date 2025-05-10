@@ -16,7 +16,10 @@
     
     <!-- ダークモード切り替えボタン -->
     <button class="theme-toggle" id="themeToggle" aria-label="ダークモードとライトモードを切り替える">🌓</button>
-    
+
+    <!-- 使い方ボタン -->
+    <button class="help-button" id="helpButton" aria-label="使い方を表示する">❓</button>
+
     <h1>肥料計算ツール</h1>
     
     <main id="main-content">
@@ -76,7 +79,7 @@
             </div>
             
             <div class="toggle-section" id="toggleAdvanced" onclick="toggleAdvancedFields()" tabindex="0" role="button" aria-expanded="false">
-                詳細項目を表示する
+                微量要素項目を表示する (Ca, Mg, S, Fe, Mn, Zn, B)
             </div>
             
             <div id="advancedInputs" style="display: none;">
@@ -154,6 +157,63 @@
         </div>
     </main>
     
+    <!-- 使い方モーダル -->
+    <div id="helpModal" class="modal" role="dialog" aria-labelledby="helpModalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <span class="close-modal help-close" tabindex="0" role="button" aria-label="閉じる">&times;</span>
+            <h2 id="helpModalTitle">肥料計算ツールの使い方</h2>
+
+            <div class="help-content">
+                <h3>基本的な使い方</h3>
+                <ol>
+                    <li><strong>「入力」タブ</strong>：肥料の情報を入力し、肥料リストに追加します。</li>
+                    <li><strong>「一覧」タブ</strong>：追加した肥料を確認し、計算します。</li>
+                    <li><strong>「結果」タブ</strong>：計算結果を確認します。</li>
+                    <li><strong>「履歴」タブ</strong>：過去の計算結果を確認できます。</li>
+                </ol>
+
+                <h3>詳細な手順</h3>
+                <h4>1. 肥料を追加する</h4>
+                <ul>
+                    <li>「入力」タブで肥料名、窒素(N)、リン酸(P)、カリウム(K)の含有率、使用量を入力します。</li>
+                    <li>必要に応じて「微量要素項目を表示する」ボタンをクリックし、二次栄養素や微量栄養素の情報も入力できます。</li>
+                    <li>「プリセット肥料」から既存の肥料を選択することも可能です。</li>
+                    <li>入力が完了したら「肥料を追加する」ボタンをクリックします。</li>
+                </ul>
+
+                <h4>2. 肥料リストを確認する</h4>
+                <ul>
+                    <li>「一覧」タブで追加した肥料のリストを確認できます。</li>
+                    <li>複数の肥料を追加することができます。</li>
+                    <li>不要な肥料は「削除」ボタンで削除できます。</li>
+                </ul>
+
+                <h4>3. 計算を実行する</h4>
+                <ul>
+                    <li>「一覧」タブで「計算する」ボタンをクリックします。</li>
+                    <li>計算結果は自動的に「結果」タブに表示されます。</li>
+                </ul>
+
+                <h4>4. 結果を確認する</h4>
+                <ul>
+                    <li>「結果」タブで総使用量、各栄養素の量と含有率、最終的なNPK比率を確認できます。</li>
+                    <li>計算結果は自動的に履歴に保存されます。</li>
+                </ul>
+
+                <h4>5. プリセットの管理</h4>
+                <ul>
+                    <li>「入力」タブの「プリセット管理」ボタンをクリックして、プリセットの表示/非表示を切り替えたり、カスタムプリセットを作成・削除できます。</li>
+                </ul>
+
+                <h3>その他の機能</h3>
+                <ul>
+                    <li><strong>ダークモード</strong>：画面右上の🌓ボタンをクリックして、ダークモードとライトモードを切り替えられます。</li>
+                    <li><strong>リセット</strong>：「一覧」タブの「すべてリセット」ボタンで、追加した肥料をすべて削除できます。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- プリセット管理モーダル -->
     <div id="presetsModal" class="modal" role="dialog" aria-labelledby="presetModalTitle" aria-hidden="true">
         <div class="modal-content">
