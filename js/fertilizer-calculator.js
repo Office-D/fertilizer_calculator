@@ -422,20 +422,28 @@ function addFertilizer() {
     const mn = parseFloat(document.getElementById('manganeseContent').value) || 0;
     const zn = parseFloat(document.getElementById('zincContent').value) || 0;
     const b = parseFloat(document.getElementById('boronContent').value) || 0;
-    const amount = parseFloat(document.getElementById('amount').value) || 0;
-    
+
+    // 使用量と単位を取得
+    let amount = parseFloat(document.getElementById('amount').value) || 0;
+    const unit = document.getElementById('amountUnit').value;
+
+    // kg単位の場合はgに変換
+    if (unit === 'kg') {
+        amount = amount * 1000; // kgをgに変換
+    }
+
     if (!name) {
         alert('肥料名を入力してください');
         document.getElementById('fertilizerName').focus();
         return;
     }
-    
+
     if (amount <= 0) {
         alert('使用量を入力してください');
         document.getElementById('amount').focus();
         return;
     }
-    
+
     // 各成分の量を計算
     const nAmount = (n / 100) * amount;
     const pAmount = (p / 100) * amount;
@@ -462,6 +470,8 @@ function addFertilizer() {
         zinc: zn,
         boron: b,
         amount,
+        originalAmount: parseFloat(document.getElementById('amount').value) || 0, // オリジナルの入力値
+        unit, // 選択された単位
         nAmount,
         pAmount,
         kAmount,
@@ -555,7 +565,7 @@ function updateFertilizerList() {
                 ${fert.magnesium > 0 ? `, Mg: ${fert.magnesium}%` : ''}
                 ${fert.sulfur > 0 ? `, S: ${fert.sulfur}%` : ''}
             </div>
-            <div class="fertilizer-amount">${fert.amount} g</div>
+            <div class="fertilizer-amount">${fert.originalAmount} ${fert.unit}</div>
         `;
         
         const deleteBtn = document.createElement('button');
@@ -587,6 +597,7 @@ function clearInputFields() {
     document.getElementById('zincContent').value = '';
     document.getElementById('boronContent').value = '';
     document.getElementById('amount').value = '';
+    document.getElementById('amountUnit').value = 'g'; // 単位をgにリセット
 }
 
 // 結果を計算する関数
@@ -731,7 +742,7 @@ function calculateResults() {
                 <div class="mobile-results">
                     <h3>総使用量</h3>
                     <div class="result-card">
-                        ${totalAmount >= 1000 ? (totalAmount / 1000).toFixed(2) + ' kg' : totalAmount.toFixed(1) + ' g'}
+                        ${formatWeight(totalAmount)}
                     </div>
                     
                     <h3>最終NPK比率</h3>
@@ -976,7 +987,7 @@ function renderHistoryList() {
         historyItem.innerHTML = `
             <h4>${item.date}</h4>
             <p>NPK比率: ${item.result.finalN.toFixed(1)}-${item.result.finalP.toFixed(1)}-${item.result.finalK.toFixed(1)}</p>
-            <p>総使用量: ${item.result.totalAmount >= 1000 ? (item.result.totalAmount / 1000).toFixed(2) + ' kg' : item.result.totalAmount.toFixed(1) + ' g'}</p>
+            <p>総使用量: ${formatWeight(item.result.totalAmount)}</p>
         `;
         
         historyItem.addEventListener('click', function() {
@@ -1116,7 +1127,7 @@ function displaySavedResult(result) {
                     <th>カリウム (K)</th>
                 </tr>
                 <tr>
-                    <td>${result.totalAmount >= 1000 ? (result.totalAmount / 1000).toFixed(2) + ' kg' : result.totalAmount.toFixed(1) + ' g'}</td>
+                    <td>${formatWeight(result.totalAmount)}</td>
                     <td>${result.totalN.toFixed(2)} g (${result.finalN.toFixed(2)}%)</td>
                     <td>${result.totalP.toFixed(2)} g (${result.finalP.toFixed(2)}%)</td>
                     <td>${result.totalK.toFixed(2)} g (${result.finalK.toFixed(2)}%)</td>
@@ -1671,6 +1682,15 @@ function toggleAdvancedFields() {
         advancedSection.style.display = 'none';
         toggleBtn.textContent = '微量要素項目を表示する (Ca, Mg, S, Fe, Mn, Zn, B)';
         toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+}
+
+// 重量の表示をフォーマットする関数
+function formatWeight(weightInGrams) {
+    if (weightInGrams >= 1000) {
+        return (weightInGrams / 1000).toFixed(2) + ' kg';
+    } else {
+        return weightInGrams.toFixed(1) + ' g';
     }
 }
 

@@ -136,6 +136,29 @@ input:focus, select:focus {
     box-shadow: 0 0 0 2px rgba(44, 119, 68, 0.2);
 }
 
+/* 使用量入力グループ */
+.amount-container {
+    margin-bottom: 15px;
+}
+
+.amount-input-group {
+    display: flex;
+    align-items: center;
+}
+
+.amount-input-group input {
+    flex: 1;
+    border-radius: 4px 0 0 4px;
+}
+
+.amount-input-group select {
+    width: 70px;
+    border-radius: 0 4px 4px 0;
+    margin-left: -1px;
+    text-align: center;
+    font-weight: 600;
+}
+
 input:invalid {
     border-color: var(--color-danger);
 }
