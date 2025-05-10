@@ -54,12 +54,12 @@
             <button class="manage-presets-btn" id="managePresetsBtn">プリセット管理</button>
             
             <h3>肥料情報入力</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="fertilizerName">肥料名 <span aria-hidden="true">*</span></label>
-                    <input type="text" id="fertilizerName" required aria-required="true">
-                </div>
-                
+            <div class="form-group">
+                <label for="fertilizerName">肥料名 <span aria-hidden="true">*</span></label>
+                <input type="text" id="fertilizerName" required aria-required="true">
+            </div>
+            
+            <div class="npk-inputs form-grid">
                 <div class="form-group">
                     <label for="nitrogenContent">窒素 (N) %</label>
                     <input type="number" id="nitrogenContent" min="0" max="100" step="0.1">
@@ -74,11 +74,11 @@
                     <label for="potassiumContent">カリウム (K) %</label>
                     <input type="number" id="potassiumContent" min="0" max="100" step="0.1">
                 </div>
-                
-                <div class="form-group">
-                    <label for="amount">使用量 (g) <span aria-hidden="true">*</span></label>
-                    <input type="number" id="amount" min="0" step="0.1" required aria-required="true">
-                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">使用量 (g) <span aria-hidden="true">*</span></label>
+                <input type="number" id="amount" min="0" step="0.1" required aria-required="true">
             </div>
             
             <div class="toggle-section" id="toggleAdvanced" onclick="toggleAdvancedFields()" tabindex="0" role="button" aria-expanded="false">
@@ -86,7 +86,7 @@
             </div>
             
             <div id="advancedInputs" style="display: none;">
-                <div class="form-grid">
+                <div class="minor-elements-grid">
                     <div class="form-group">
                         <label for="calciumContent">カルシウム (Ca) %</label>
                         <input type="number" id="calciumContent" min="0" max="100" step="0.1">
@@ -135,7 +135,7 @@
                 <p>肥料がまだ追加されていません</p>
             </div>
             
-            <div class="control-buttons">
+            <div class="control-buttons" id="listControls">
                 <button class="calculate-btn" id="calculateBtn">計算する</button>
                 <button class="reset-btn" id="resetBtn">すべてリセット</button>
             </div>
@@ -237,12 +237,12 @@
                 
                 <h3>新しいプリセットを追加</h3>
                 <div class="add-preset-section">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="newPresetName">プリセット名 <span aria-hidden="true">*</span></label>
-                            <input type="text" id="newPresetName" required aria-required="true">
-                        </div>
-                        
+                    <div class="form-group">
+                        <label for="newPresetName">プリセット名 <span aria-hidden="true">*</span></label>
+                        <input type="text" id="newPresetName" required aria-required="true">
+                    </div>
+                    
+                    <div class="npk-inputs form-grid">
                         <div class="form-group">
                             <label for="newPresetN">窒素 (N) %</label>
                             <input type="number" id="newPresetN" min="0" max="100" step="0.1">
@@ -257,7 +257,9 @@
                             <label for="newPresetK">カリウム (K) %</label>
                             <input type="number" id="newPresetK" min="0" max="100" step="0.1">
                         </div>
-                        
+                    </div>
+                    
+                    <div class="minor-elements-grid">
                         <div class="form-group">
                             <label for="newPresetCa">カルシウム (Ca) %</label>
                             <input type="number" id="newPresetCa" min="0" max="100" step="0.1">
@@ -298,6 +300,12 @@
                 </div>
             </div>
         </div>
+    </div>
+    
+    <!-- フローティングアクションボタン（モバイル用） -->
+    <div id="mobileControls" class="floating-action-buttons" style="display: none;">
+        <button class="calculate-btn" id="mobileCalculateBtn">計算する</button>
+        <button class="reset-btn" id="mobileResetBtn">リセット</button>
     </div>
     
     <script src="js/fertilizer-calculator.js"></script>
