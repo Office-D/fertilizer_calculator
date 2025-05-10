@@ -885,6 +885,55 @@
                 padding: 15px;
             }
 
+            /* モバイル用の結果カードスタイル */
+            .mobile-results {
+                width: 100%;
+                padding: 10px 0;
+            }
+
+            .result-card {
+                background-color: var(--bg-accent);
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+            .result-card.highlight {
+                background: linear-gradient(135deg, #e9f7ef, #d5f5e3);
+                color: #2c7744;
+                font-size: 24px;
+                padding: 15px;
+                box-shadow: 0 3px 8px rgba(44, 119, 68, 0.2);
+            }
+
+            .result-cards {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .card-title {
+                font-size: 14px;
+                margin-bottom: 5px;
+                color: var(--text-secondary);
+            }
+
+            .card-value {
+                font-size: 16px;
+                font-weight: bold;
+                margin-bottom: 3px;
+            }
+
+            .card-percent {
+                font-size: 14px;
+                color: var(--text-secondary);
+            }
+
             /* フォーム要素のタッチ領域拡大 */
             input, select, button {
                 touch-action: manipulation; /* ダブルタップによるズームを防止 */
@@ -1374,57 +1423,147 @@
         // 保存された結果を表示
         function displaySavedResult(result) {
             const resultsDiv = document.getElementById('calculationResults');
-            resultsDiv.innerHTML = `
-                <h3>主要成分</h3>
-                <table>
-                    <tr>
-                        <th>総使用量</th>
-                        <th>窒素 (N)</th>
-                        <th>リン酸 (P)</th>
-                        <th>カリウム (K)</th>
-                    </tr>
-                    <tr>
-                        <td>${result.totalAmount >= 1000 ? (result.totalAmount / 1000).toFixed(2) + ' kg' : result.totalAmount.toFixed(1) + ' g'}</td>
-                        <td>${result.totalN.toFixed(2)} g (${result.finalN.toFixed(2)}%)</td>
-                        <td>${result.totalP.toFixed(2)} g (${result.finalP.toFixed(2)}%)</td>
-                        <td>${result.totalK.toFixed(2)} g (${result.finalK.toFixed(2)}%)</td>
-                    </tr>
-                </table>
-                
-                <h3>二次栄養素</h3>
-                <table>
-                    <tr>
-                        <th>カルシウム (Ca)</th>
-                        <th>マグネシウム (Mg)</th>
-                        <th>硫黄 (S)</th>
-                    </tr>
-                    <tr>
-                        <td>${result.totalCa.toFixed(2)} g (${result.finalCa.toFixed(2)}%)</td>
-                        <td>${result.totalMg.toFixed(2)} g (${result.finalMg.toFixed(2)}%)</td>
-                        <td>${result.totalS.toFixed(2)} g (${result.finalS.toFixed(2)}%)</td>
-                    </tr>
-                </table>
-                
-                <h3>微量栄養素</h3>
-                <table>
-                    <tr>
-                        <th>鉄 (Fe)</th>
-                        <th>マンガン (Mn)</th>
-                        <th>亜鉛 (Zn)</th>
-                        <th>ホウ素 (B)</th>
-                    </tr>
-                    <tr>
-                        <td>${result.totalFe.toFixed(2)} g (${result.finalFe.toFixed(3)}%)</td>
-                        <td>${result.totalMn.toFixed(2)} g (${result.finalMn.toFixed(3)}%)</td>
-                        <td>${result.totalZn.toFixed(2)} g (${result.finalZn.toFixed(3)}%)</td>
-                        <td>${result.totalB.toFixed(2)} g (${result.finalB.toFixed(3)}%)</td>
-                    </tr>
-                </table>
-                
-                <h3>最終NPK比率: ${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}</h3>
-                <p>※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
-                <p><em>※ この結果は履歴から読み込まれました</em></p>
-            `;
+
+            // モバイルかどうかを検出
+            const isMobile = window.innerWidth <= 480;
+
+            if (isMobile) {
+                // モバイル用のレイアウト
+                resultsDiv.innerHTML = `
+                    <div class="mobile-results">
+                        <h3>総使用量</h3>
+                        <div class="result-card">
+                            ${result.totalAmount >= 1000 ? (result.totalAmount / 1000).toFixed(2) + ' kg' : result.totalAmount.toFixed(1) + ' g'}
+                        </div>
+
+                        <h3>最終NPK比率</h3>
+                        <div class="result-card highlight">
+                            ${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}
+                        </div>
+
+                        <h3>主要成分</h3>
+                        <div class="result-cards">
+                            <div class="result-card">
+                                <div class="card-title">窒素 (N)</div>
+                                <div class="card-value">${result.totalN.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalN.toFixed(2)}%</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="card-title">リン酸 (P)</div>
+                                <div class="card-value">${result.totalP.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalP.toFixed(2)}%</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="card-title">カリウム (K)</div>
+                                <div class="card-value">${result.totalK.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalK.toFixed(2)}%</div>
+                            </div>
+                        </div>
+
+                        <h3>二次栄養素</h3>
+                        <div class="result-cards">
+                            <div class="result-card">
+                                <div class="card-title">カルシウム (Ca)</div>
+                                <div class="card-value">${result.totalCa.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalCa.toFixed(2)}%</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="card-title">マグネシウム (Mg)</div>
+                                <div class="card-value">${result.totalMg.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalMg.toFixed(2)}%</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="card-title">硫黄 (S)</div>
+                                <div class="card-value">${result.totalS.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalS.toFixed(2)}%</div>
+                            </div>
+                        </div>
+
+                        <h3>微量栄養素</h3>
+                        <div class="result-cards">
+                            <div class="result-card">
+                                <div class="card-title">鉄 (Fe)</div>
+                                <div class="card-value">${result.totalFe.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalFe.toFixed(3)}%</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="card-title">マンガン (Mn)</div>
+                                <div class="card-value">${result.totalMn.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalMn.toFixed(3)}%</div>
+                            </div>
+                        </div>
+                        <div class="result-cards">
+                            <div class="result-card">
+                                <div class="card-title">亜鉛 (Zn)</div>
+                                <div class="card-value">${result.totalZn.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalZn.toFixed(3)}%</div>
+                            </div>
+                            <div class="result-card">
+                                <div class="card-title">ホウ素 (B)</div>
+                                <div class="card-value">${result.totalB.toFixed(2)} g</div>
+                                <div class="card-percent">${result.finalB.toFixed(3)}%</div>
+                            </div>
+                        </div>
+
+                        <p>※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
+                        <p><em>※ この結果は履歴から読み込まれました</em></p>
+                    </div>
+                `;
+            } else {
+                // デスクトップ用の従来通りのテーブルレイアウト
+                resultsDiv.innerHTML = `
+                    <h3>主要成分</h3>
+                    <table>
+                        <tr>
+                            <th>総使用量</th>
+                            <th>窒素 (N)</th>
+                            <th>リン酸 (P)</th>
+                            <th>カリウム (K)</th>
+                        </tr>
+                        <tr>
+                            <td>${result.totalAmount >= 1000 ? (result.totalAmount / 1000).toFixed(2) + ' kg' : result.totalAmount.toFixed(1) + ' g'}</td>
+                            <td>${result.totalN.toFixed(2)} g (${result.finalN.toFixed(2)}%)</td>
+                            <td>${result.totalP.toFixed(2)} g (${result.finalP.toFixed(2)}%)</td>
+                            <td>${result.totalK.toFixed(2)} g (${result.finalK.toFixed(2)}%)</td>
+                        </tr>
+                    </table>
+
+                    <h3>二次栄養素</h3>
+                    <table>
+                        <tr>
+                            <th>カルシウム (Ca)</th>
+                            <th>マグネシウム (Mg)</th>
+                            <th>硫黄 (S)</th>
+                        </tr>
+                        <tr>
+                            <td>${result.totalCa.toFixed(2)} g (${result.finalCa.toFixed(2)}%)</td>
+                            <td>${result.totalMg.toFixed(2)} g (${result.finalMg.toFixed(2)}%)</td>
+                            <td>${result.totalS.toFixed(2)} g (${result.finalS.toFixed(2)}%)</td>
+                        </tr>
+                    </table>
+
+                    <h3>微量栄養素</h3>
+                    <table>
+                        <tr>
+                            <th>鉄 (Fe)</th>
+                            <th>マンガン (Mn)</th>
+                            <th>亜鉛 (Zn)</th>
+                            <th>ホウ素 (B)</th>
+                        </tr>
+                        <tr>
+                            <td>${result.totalFe.toFixed(2)} g (${result.finalFe.toFixed(3)}%)</td>
+                            <td>${result.totalMn.toFixed(2)} g (${result.finalMn.toFixed(3)}%)</td>
+                            <td>${result.totalZn.toFixed(2)} g (${result.finalZn.toFixed(3)}%)</td>
+                            <td>${result.totalB.toFixed(2)} g (${result.finalB.toFixed(3)}%)</td>
+                        </tr>
+                    </table>
+
+                    <h3>最終NPK比率: ${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}</h3>
+                    <p>※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
+                    <p><em>※ この結果は履歴から読み込まれました</em></p>
+                `;
+            }
+        }
         }
         
         // プリセットボタンを描画する
@@ -2121,8 +2260,98 @@
                 // 履歴に追加
                 addToHistory(result);
 
+                // モバイルかどうかを検出
+                const isMobile = window.innerWidth <= 480;
+
                 // 結果のHTML作成（まだ表示せず）
-                const resultHTML = `
+                let resultHTML = '';
+
+                if (isMobile) {
+                    // モバイル用のカードレイアウト
+                    resultHTML = `
+                    <div class="result-content" style="opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out;">
+                        <div class="mobile-results">
+                            <h3>総使用量</h3>
+                            <div class="result-card">
+                                ${totalAmount >= 1000 ? (totalAmount / 1000).toFixed(2) + ' kg' : totalAmount.toFixed(1) + ' g'}
+                            </div>
+
+                            <h3>最終NPK比率</h3>
+                            <div class="result-card highlight">
+                                ${finalN.toFixed(1)}-${finalP.toFixed(1)}-${finalK.toFixed(1)}
+                            </div>
+
+                            <h3>主要成分</h3>
+                            <div class="result-cards">
+                                <div class="result-card">
+                                    <div class="card-title">窒素 (N)</div>
+                                    <div class="card-value">${totalN.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalN.toFixed(2)}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="card-title">リン酸 (P)</div>
+                                    <div class="card-value">${totalP.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalP.toFixed(2)}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="card-title">カリウム (K)</div>
+                                    <div class="card-value">${totalK.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalK.toFixed(2)}%</div>
+                                </div>
+                            </div>
+
+                            <h3>二次栄養素</h3>
+                            <div class="result-cards">
+                                <div class="result-card">
+                                    <div class="card-title">カルシウム (Ca)</div>
+                                    <div class="card-value">${totalCa.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalCa.toFixed(2)}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="card-title">マグネシウム (Mg)</div>
+                                    <div class="card-value">${totalMg.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalMg.toFixed(2)}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="card-title">硫黄 (S)</div>
+                                    <div class="card-value">${totalS.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalS.toFixed(2)}%</div>
+                                </div>
+                            </div>
+
+                            <h3>微量栄養素</h3>
+                            <div class="result-cards">
+                                <div class="result-card">
+                                    <div class="card-title">鉄 (Fe)</div>
+                                    <div class="card-value">${totalFe.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalFe.toFixed(3)}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="card-title">マンガン (Mn)</div>
+                                    <div class="card-value">${totalMn.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalMn.toFixed(3)}%</div>
+                                </div>
+                            </div>
+                            <div class="result-cards">
+                                <div class="result-card">
+                                    <div class="card-title">亜鉛 (Zn)</div>
+                                    <div class="card-value">${totalZn.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalZn.toFixed(3)}%</div>
+                                </div>
+                                <div class="result-card">
+                                    <div class="card-title">ホウ素 (B)</div>
+                                    <div class="card-value">${totalB.toFixed(2)} g</div>
+                                    <div class="card-percent">${finalB.toFixed(3)}%</div>
+                                </div>
+                            </div>
+
+                            <p style="margin-top: 20px; font-style: italic; color: #777;">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
+                        </div>
+                    </div>
+                    `;
+                } else {
+                    // デスクトップ用の従来通りのテーブルレイアウト
+                    resultHTML = `
                     <div class="result-content" style="opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out;">
                         <h3>主要成分</h3>
                         <table>
@@ -2185,7 +2414,8 @@
 
                         <p style="margin-top: 20px; font-style: italic; color: #777;">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
                     </div>
-                `;
+                    `;
+                }
 
                 // 結果を表示してアニメーションを開始
                 resultsDiv.innerHTML = resultHTML;
