@@ -430,24 +430,32 @@ tr:hover {
 
 /* タイトル周りのレイアウト */
 .header-container {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
     margin-bottom: 20px;
+    width: 100%;
 }
 
 .header-container h1 {
-    position: relative;
-    display: inline-block;
-    padding-right: 0;
-    margin-right: 100px; /* ボタン用のスペース */
+    text-align: center;
+    width: 100%;
+    margin-bottom: 15px;
+    font-size: 28px;
+    border-bottom: 3px solid var(--color-primary-light);
+    padding-bottom: 10px;
+}
+
+.header-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 /* ダークモード切り替えボタン */
 .theme-toggle {
-    position: absolute;
-    top: 50%;
-    right: -45px;
-    transform: translateY(-50%);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -465,16 +473,12 @@ tr:hover {
 }
 
 .theme-toggle:hover {
-    transform: translateY(-50%) rotate(30deg);
+    transform: rotate(30deg);
     box-shadow: 0 2px 8px var(--color-shadow-strong);
 }
 
 /* 使い方ボタン */
 .help-button {
-    position: absolute;
-    top: 50%;
-    right: -90px; /* ダークモードボタンの左側に配置 */
-    transform: translateY(-50%);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -494,7 +498,7 @@ tr:hover {
 }
 
 .help-button:hover {
-    transform: translateY(-50%) scale(1.1);
+    transform: scale(1.1);
     box-shadow: 0 2px 8px var(--color-shadow-strong);
     background-color: var(--color-primary);
 }
@@ -707,36 +711,25 @@ tr:hover {
     }
 
     .header-container h1 {
-        margin-right: 0;
-        padding-right: 0;
-        margin-bottom: 50px;
         font-size: 24px;
+        margin-bottom: 10px;
     }
 
-    .theme-toggle {
-        top: 40px;
-        right: 10px;
+    .header-buttons {
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .theme-toggle, .help-button {
         width: 36px;
         height: 36px;
-        transform: none;
-    }
-
-    .theme-toggle:hover {
-        transform: rotate(30deg);
     }
 
     .help-button {
-        top: 40px;
-        right: 60px;
-        width: 36px;
-        height: 36px;
         font-size: 16px;
-        transform: none;
     }
 
-    .help-button:hover {
-        transform: scale(1.1);
-    }
+    /* ヘッダーボタンのスタイルはすでに上で定義済み */
 
     /* 履歴項目の調整 */
     .history-item {
@@ -768,30 +761,16 @@ tr:hover {
 /* スマホ向け調整 */
 @media screen and (max-width: 480px) {
     .header-container {
-        text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 30px;
     }
 
     .header-container h1 {
         font-size: 22px;
-        margin-bottom: 5px;
-        display: block;
-        width: 100%;
-        text-align: center;
+        margin-bottom: 10px;
     }
 
-    .theme-toggle, .help-button {
-        position: absolute;
-        top: 40px;
-        transform: none;
-    }
-
-    .theme-toggle {
-        right: calc(50% - 20px);
-    }
-
-    .help-button {
-        right: calc(50% - 60px);
+    .header-buttons {
+        gap: 15px;
     }
 
     .form-grid {
