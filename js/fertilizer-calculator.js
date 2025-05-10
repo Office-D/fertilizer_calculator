@@ -1555,10 +1555,35 @@ function renderPresets() {
     
     // 表示するデフォルトプリセット
     defaultPresets.filter(preset => preset.isVisible).forEach(preset => {
-        const displayName = getPresetDisplayName(preset);
         const btn = document.createElement('button');
         btn.className = 'preset-btn';
-        btn.textContent = displayName;
+
+        // プリセット名とNPK値を別々の要素として追加
+        const nameElem = document.createElement('span');
+        nameElem.className = 'preset-name';
+        nameElem.textContent = preset.name;
+
+        const npkElem = document.createElement('span');
+        npkElem.className = 'preset-npk';
+
+        // NPK値を表示
+        let npkText = `(${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
+
+        // 追加の主要成分があれば表示
+        const extras = [];
+        if (preset.calcium > 0) extras.push(`Ca${preset.calcium}`);
+        if (preset.magnesium > 0) extras.push(`Mg${preset.magnesium}`);
+        if (preset.sulfur > 0) extras.push(`S${preset.sulfur}`);
+
+        const extrasText = extras.length > 0 ? '+' + extras.join(',') : '';
+        npkText += `${extrasText})`;
+
+        npkElem.textContent = npkText;
+
+        // 要素を追加
+        btn.appendChild(nameElem);
+        btn.appendChild(npkElem);
+
         btn.setAttribute('aria-label', `${preset.name}を選択: 窒素${preset.nitrogen}%, リン酸${preset.phosphorus}%, カリウム${preset.potassium}%`);
         btn.onclick = function() {
             addPreset(
@@ -1577,13 +1602,38 @@ function renderPresets() {
         };
         container.appendChild(btn);
     });
-    
+
     // ユーザープリセット
     userPresets.forEach(preset => {
-        const displayName = getPresetDisplayName(preset);
         const btn = document.createElement('button');
         btn.className = 'preset-btn';
-        btn.textContent = displayName;
+
+        // プリセット名とNPK値を別々の要素として追加
+        const nameElem = document.createElement('span');
+        nameElem.className = 'preset-name';
+        nameElem.textContent = preset.name;
+
+        const npkElem = document.createElement('span');
+        npkElem.className = 'preset-npk';
+
+        // NPK値を表示
+        let npkText = `(${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
+
+        // 追加の主要成分があれば表示
+        const extras = [];
+        if (preset.calcium > 0) extras.push(`Ca${preset.calcium}`);
+        if (preset.magnesium > 0) extras.push(`Mg${preset.magnesium}`);
+        if (preset.sulfur > 0) extras.push(`S${preset.sulfur}`);
+
+        const extrasText = extras.length > 0 ? '+' + extras.join(',') : '';
+        npkText += `${extrasText})`;
+
+        npkElem.textContent = npkText;
+
+        // 要素を追加
+        btn.appendChild(nameElem);
+        btn.appendChild(npkElem);
+
         btn.setAttribute('aria-label', `${preset.name}を選択: 窒素${preset.nitrogen}%, リン酸${preset.phosphorus}%, カリウム${preset.potassium}%`);
         btn.setAttribute('data-preset-type', 'user');
         btn.onclick = function() {
@@ -1865,24 +1915,8 @@ function toggleAdvancedFields() {
     }
 }
 
-// プリセットの表示名を生成
-function getPresetDisplayName(preset) {
-    let name = preset.name;
-
-    // NPK値を追加
-    const npk = `(${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
-
-    // NPK以外の主要な成分を追加
-    const extras = [];
-    if (preset.calcium > 0) extras.push(`Ca${preset.calcium}`);
-    if (preset.magnesium > 0) extras.push(`Mg${preset.magnesium}`);
-    if (preset.sulfur > 0) extras.push(`S${preset.sulfur}`);
-
-    // 追加成分がある場合は追加
-    const extrasText = extras.length > 0 ? '+' + extras.join(',') : '';
-
-    return `${name} ${npk}${extrasText})`;
-}
+// プリセットの表示は renderPresets() 内で直接処理するように変更したため、
+// この関数は削除
 
 // 設定をローカルストレージから読み込む
 function loadSettings() {
