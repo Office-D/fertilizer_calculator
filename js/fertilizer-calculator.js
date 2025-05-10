@@ -1347,8 +1347,8 @@ function renderPresets() {
         const npkElem = document.createElement('span');
         npkElem.className = 'preset-npk';
 
-        // NPK値はシンプルに表示
-        npkElem.textContent = `${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
+        // NPK値は「N-P-K」形式で表示
+        npkElem.textContent = `N-P-K: ${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
 
         // 要素を追加
         btn.appendChild(nameElem);
@@ -1386,8 +1386,8 @@ function renderPresets() {
         const npkElem = document.createElement('span');
         npkElem.className = 'preset-npk';
 
-        // NPK値はシンプルに表示
-        npkElem.textContent = `${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
+        // NPK値は「N-P-K」形式で表示
+        npkElem.textContent = `N-P-K: ${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
 
         // 要素を追加
         btn.appendChild(nameElem);
