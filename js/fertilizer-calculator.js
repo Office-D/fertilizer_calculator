@@ -16,10 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // タブの初期化
     initTabs();
-    
-    // テーマの初期化
-    initTheme();
-    
+
     // モバイル対応の初期化
     initMobileSupport();
     
@@ -120,193 +117,7 @@ function switchTab(tabId) {
     }
 }
 
-// テーマの初期化
-function initTheme() {
-    const themeToggleBtn = document.getElementById('themeToggle');
-    if (!themeToggleBtn) return;
-    
-    // ローカルストレージからユーザー設定を読み込む
-    const userPrefersDark = localStorage.getItem('darkMode') === 'true';
-    
-    // OSの設定をチェック
-    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    // ダークモードを適用すべきか決定
-    const shouldApplyDark = userPrefersDark !== null ? userPrefersDark : systemPrefersDark;
-    
-    // 初期状態を設定
-    if (shouldApplyDark) {
-        document.body.classList.add('dark-mode');
-        themeToggleBtn.textContent = '🌞'; // 太陽アイコン（明るくするオプション）
-
-        // ページ読み込み時にも使い方モーダルとプリセットモーダルの色を調整
-        const helpModal = document.getElementById('helpModal');
-        if (helpModal && helpModal.style.display === 'block') {
-            adjustHelpModalForDarkMode();
-        }
-
-        const presetsModal = document.getElementById('presetsModal');
-        if (presetsModal && presetsModal.style.display === 'block') {
-            presetsModal.querySelectorAll('h2, h3, p').forEach(el => {
-                el.style.color = '#e0e0e0';
-            });
-        }
-    } else {
-        themeToggleBtn.textContent = '🌙'; // 月アイコン（暗くするオプション）
-    }
-    
-    // テーマ切り替え機能
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-
-        // ダークモードがアクティブかどうかの新しい状態
-        const isDarkMode = document.body.classList.contains('dark-mode');
-
-        // ローカルストレージに設定を保存
-        localStorage.setItem('darkMode', isDarkMode);
-
-        // アイコンを更新
-        themeToggleBtn.textContent = isDarkMode ? '🌞' : '🌙';
-
-        // スクリーンリーダー用の通知
-        const modeAnnouncer = document.createElement('div');
-        modeAnnouncer.className = 'visually-hidden';
-        modeAnnouncer.setAttribute('role', 'status');
-        modeAnnouncer.setAttribute('aria-live', 'polite');
-        modeAnnouncer.textContent = isDarkMode ? 'ダークモードに切り替えました' : 'ライトモードに切り替えました';
-        document.body.appendChild(modeAnnouncer);
-
-        // モーダルのダークモード対応
-        // 使い方モーダルの背景色とテキスト色を調整
-        const helpModal = document.getElementById('helpModal');
-        if (helpModal) {
-            // モーダルコンテンツの背景色を設定
-            const modalContent = helpModal.querySelector('.modal-content');
-            if (modalContent) {
-                modalContent.style.backgroundColor = isDarkMode ? '#212121' : '#f8f9fa';
-                modalContent.style.borderColor = isDarkMode ? '#616161' : '#dee2e6';
-            }
-
-            // 使い方モーダルが開いていたら色を適用
-            if (helpModal.style.display === 'block') {
-                adjustHelpModalForDarkMode();
-            }
-        }
-
-        // プリセット管理モーダルも同様に調整
-        const presetsModal = document.getElementById('presetsModal');
-        if (presetsModal) {
-            const presetsModalContent = presetsModal.querySelector('.modal-content');
-            if (presetsModalContent) {
-                presetsModalContent.style.backgroundColor = isDarkMode ? '#212121' : '#f8f9fa';
-                presetsModalContent.style.borderColor = isDarkMode ? '#616161' : '#dee2e6';
-            }
-
-            // テキスト色も調整（リストアイテム内のテキストなど）
-            if (isDarkMode) {
-                presetsModal.querySelectorAll('h2, h3, p').forEach(el => {
-                    el.style.color = '#e0e0e0';
-                });
-            } else {
-                presetsModal.querySelectorAll('h2, h3, p').forEach(el => {
-                    el.style.color = 'var(--color-text)';
-                });
-            }
-        }
-
-        // 通知を一定時間後に削除
-        setTimeout(() => {
-            document.body.removeChild(modeAnnouncer);
-        }, 1000);
-    }
-
-    // 使い方モーダルをダークモードに対応させる関数
-    function adjustHelpModalForDarkMode() {
-        const isDarkMode = document.body.classList.contains('dark-mode');
-        const helpModal = document.getElementById('helpModal');
-        if (!helpModal) return;
-
-        // テキスト要素を階層ごとに選択して色を適用
-        const headings = helpModal.querySelectorAll('h2, h3, h4');
-        const paragraphs = helpModal.querySelectorAll('p, li');
-        const emphasizedText = helpModal.querySelectorAll('strong');
-        const listMarkers = helpModal.querySelectorAll('ol, ul');
-
-        if (isDarkMode) {
-            // ダークモードでの色設定
-            headings.forEach(el => {
-                if (el.tagName === 'H2') el.style.color = '#66bb6a'; // 見出しレベル1は明るい緑
-                else if (el.tagName === 'H3') el.style.color = '#81c784'; // 見出しレベル2は中間の緑
-                else if (el.tagName === 'H4') el.style.color = '#a5d6a7'; // 見出しレベル3は薄い緑
-            });
-            paragraphs.forEach(el => el.style.color = '#e0e0e0'); // 通常テキストは明るい灰色
-            emphasizedText.forEach(el => el.style.color = '#b9f6ca'); // 強調テキストは明るい緑
-            listMarkers.forEach(el => el.style.color = '#e0e0e0'); // リストマーカーも明るい灰色
-        } else {
-            // ライトモードの場合はリセット
-            headings.forEach(el => {
-                if (el.tagName === 'H2') el.style.color = 'var(--color-primary)';
-                else if (el.tagName === 'H3') el.style.color = 'var(--color-primary)';
-                else if (el.tagName === 'H4') el.style.color = 'var(--color-secondary)';
-            });
-            paragraphs.forEach(el => el.style.color = 'var(--color-text)');
-            emphasizedText.forEach(el => el.style.color = 'var(--color-primary-dark)');
-            listMarkers.forEach(el => el.style.color = 'var(--color-text)');
-        }
-    }
-
-    // クリックとタッチの両方に対応（タッチ反応を改善）
-    themeToggleBtn.addEventListener('click', toggleTheme);
-
-    // タッチデバイス向けに最適化
-    themeToggleBtn.addEventListener('touchstart', function(e) {
-        // タッチ開始位置を記録
-        this.touchStartX = e.touches[0].clientX;
-        this.touchStartY = e.touches[0].clientY;
-        // 視覚的なフィードバック
-        this.style.opacity = '0.7';
-    }, {passive: true});
-
-    themeToggleBtn.addEventListener('touchend', function(e) {
-        // 視覚的なフィードバックを元に戻す
-        this.style.opacity = '1';
-
-        // タッチ移動距離をチェック（スワイプ操作と区別）
-        if (this.touchStartX && this.touchStartY) {
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            const dx = touchEndX - this.touchStartX;
-            const dy = touchEndY - this.touchStartY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            // 小さな移動距離ならタップとして処理
-            if (distance < 10) {
-                e.preventDefault();
-                toggleTheme();
-            }
-        } else {
-            // タッチ開始情報がない場合はそのままトグル
-            e.preventDefault();
-            toggleTheme();
-        }
-
-        // タッチ位置情報をリセット
-        this.touchStartX = null;
-        this.touchStartY = null;
-    });
-    
-    // OS設定の変更を監視
-    if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            // ユーザーが明示的に設定していない場合のみOSの設定に従う
-            if (localStorage.getItem('darkMode') === null) {
-                const shouldBeDark = event.matches;
-                document.body.classList.toggle('dark-mode', shouldBeDark);
-                themeToggleBtn.textContent = shouldBeDark ? '🌞' : '🌙';
-            }
-        });
-    }
-}
+// テーマの初期化 - ダークモード機能を削除
 
 // モバイルデバイス向けの最適化
 function initMobileSupport() {
@@ -1190,18 +1001,14 @@ function displaySavedResult(result) {
     // モバイルかどうかを検出
     const isMobile = window.innerWidth <= 480;
 
-    // ダークモードかどうかを検出
-    const isDarkMode = document.body.classList.contains('dark-mode');
-
-    // 文字色の設定（ダークモード対応）
-    const noteColor = isDarkMode ? '#bdbdbd' : '#777';
-    const emphasisColor = isDarkMode ? '#81c784' : 'var(--color-primary-dark)';
+    // ダークモード機能を削除
+    // 文字色の設定
+    const noteColor = '#777';
+    const emphasisColor = 'var(--color-primary-dark)';
 
     if (isMobile) {
-        // NPK比率カードのスタイル（ダークモード対応）
-        const highlightCardStyle = isDarkMode
-            ? 'background: linear-gradient(135deg, #2e7d32, #388e3c); color: #e8f5e9;'
-            : 'background: linear-gradient(135deg, #e9f7ef, #d5f5e3); color: #2c7744;';
+        // NPK比率カードのスタイル
+        const highlightCardStyle = 'background: linear-gradient(135deg, #e9f7ef, #d5f5e3); color: #2c7744;';
 
         // モバイル用のレイアウト
         resultsDiv.innerHTML = `
@@ -1285,28 +1092,18 @@ function displaySavedResult(result) {
             </div>
         `;
     } else {
-        // NPK結果ボックスのスタイル（ダークモード対応）
-        const npkResultStyle = isDarkMode
-            ? `
-                margin-top: 20px;
-                background: linear-gradient(135deg, #2e7d32, #388e3c);
-                color: #e8f5e9;
-                padding: 15px;
-                border-radius: 8px;
-                text-align: center;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            `
-            : `
-                margin-top: 20px;
-                background: linear-gradient(135deg, #e9f7ef, #d5f5e3);
-                padding: 15px;
-                border-radius: 8px;
-                text-align: center;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            `;
+        // NPK結果ボックスのスタイル
+        const npkResultStyle = `
+            margin-top: 20px;
+            background: linear-gradient(135deg, #e9f7ef, #d5f5e3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        `;
 
-        // NPK比率の表示色（ダークモード対応）
-        const npkValueColor = isDarkMode ? '#b9f6ca' : '#2c7744';
+        // NPK比率の表示色
+        const npkValueColor = '#2c7744';
 
         // デスクトップ用の従来通りのテーブルレイアウト
         resultsDiv.innerHTML = `
@@ -1407,28 +1204,19 @@ function openPresetsModal() {
     modal.style.display = 'block';
     modal.setAttribute('aria-hidden', 'false');
 
-    // ダークモードかどうかを確認
-    const isDarkMode = document.body.classList.contains('dark-mode');
+    // ダークモード機能削除
 
     // モーダルコンテンツの背景色を設定
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
-        modalContent.style.backgroundColor = isDarkMode ? '#212121' : '#f8f9fa';
-        modalContent.style.borderColor = isDarkMode ? '#616161' : '#dee2e6';
+        modalContent.style.backgroundColor = '#f8f9fa';
+        modalContent.style.borderColor = '#dee2e6';
     }
 
-    // モーダル内のテキスト色をダークモードに応じて設定
-    if (isDarkMode) {
-        // ダークモードではライトカラーを設定
-        modal.querySelectorAll('h2, h3, p').forEach(text => {
-            text.style.color = '#e0e0e0';
-        });
-    } else {
-        // ライトモードでは黒色を設定
-        modal.querySelectorAll('h2, h3').forEach(title => {
-            title.style.color = 'black';
-        });
-    }
+    // モーダル内のテキスト色を設定
+    modal.querySelectorAll('h2, h3').forEach(title => {
+        title.style.color = 'black';
+    });
 
     // モーダル表示前に内容を更新
     renderPresetLists();
@@ -1470,27 +1258,20 @@ function openHelpModal() {
     modal.style.display = 'block';
     modal.setAttribute('aria-hidden', 'false');
 
-    // ダークモードかどうかを確認
-    const isDarkMode = document.body.classList.contains('dark-mode');
+    // ダークモード機能削除
 
     // モーダルコンテンツの背景色を設定
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
-        modalContent.style.backgroundColor = isDarkMode ? '#212121' : '#f8f9fa';
-        modalContent.style.borderColor = isDarkMode ? '#616161' : '#dee2e6';
+        modalContent.style.backgroundColor = '#f8f9fa';
+        modalContent.style.borderColor = '#dee2e6';
     }
 
-    // モーダル内のテキスト色をダークモードに応じて設定
-    if (isDarkMode) {
-        // ダークモードならここで調整関数を呼び出す
-        adjustHelpModalForDarkMode();
-    } else {
-        // ライトモードでは黒色を設定
-        const modalTexts = modal.querySelectorAll('h2, h3, h4, p, li, strong');
-        modalTexts.forEach(text => {
-            text.style.color = 'black';
-        });
-    }
+    // モーダル内のテキスト色を設定
+    const modalTexts = modal.querySelectorAll('h2, h3, h4, p, li, strong');
+    modalTexts.forEach(text => {
+        text.style.color = 'black';
+    });
 
     // リストマーカーを調整
     const listElements = modal.querySelectorAll('li');
@@ -1566,19 +1347,8 @@ function renderPresets() {
         const npkElem = document.createElement('span');
         npkElem.className = 'preset-npk';
 
-        // NPK値を表示
-        let npkText = `(${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
-
-        // 追加の主要成分があれば表示
-        const extras = [];
-        if (preset.calcium > 0) extras.push(`Ca${preset.calcium}`);
-        if (preset.magnesium > 0) extras.push(`Mg${preset.magnesium}`);
-        if (preset.sulfur > 0) extras.push(`S${preset.sulfur}`);
-
-        const extrasText = extras.length > 0 ? '+' + extras.join(',') : '';
-        npkText += `${extrasText})`;
-
-        npkElem.textContent = npkText;
+        // NPK値だけをシンプルに表示
+        npkElem.textContent = `${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
 
         // 要素を追加
         btn.appendChild(nameElem);
@@ -1616,19 +1386,8 @@ function renderPresets() {
         const npkElem = document.createElement('span');
         npkElem.className = 'preset-npk';
 
-        // NPK値を表示
-        let npkText = `(${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
-
-        // 追加の主要成分があれば表示
-        const extras = [];
-        if (preset.calcium > 0) extras.push(`Ca${preset.calcium}`);
-        if (preset.magnesium > 0) extras.push(`Mg${preset.magnesium}`);
-        if (preset.sulfur > 0) extras.push(`S${preset.sulfur}`);
-
-        const extrasText = extras.length > 0 ? '+' + extras.join(',') : '';
-        npkText += `${extrasText})`;
-
-        npkElem.textContent = npkText;
+        // NPK値だけをシンプルに表示
+        npkElem.textContent = `${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
 
         // 要素を追加
         btn.appendChild(nameElem);
@@ -1738,7 +1497,7 @@ function renderPresetLists() {
 
             // 一行のテキストとして表示
             textContainer.textContent = `${preset.name} (${preset.nitrogen}-${preset.phosphorus}-${preset.potassium})`;
-            textContainer.style.color = document.body.classList.contains('dark-mode') ? '#e0e0e0' : 'black';
+            textContainer.style.color = 'black';
             textContainer.style.fontWeight = 'normal';
 
             item.appendChild(checkboxContainer);
@@ -1777,7 +1536,7 @@ function renderPresetLists() {
 
                 // 一行のテキストとして表示
                 textContainer.textContent = `${preset.name} (${preset.nitrogen}-${preset.phosphorus}-${preset.potassium})`;
-                textContainer.style.color = document.body.classList.contains('dark-mode') ? '#e0e0e0' : 'black';
+                textContainer.style.color = 'black';
                 textContainer.style.fontWeight = 'normal';
 
                 // 削除ボタン部分
