@@ -861,11 +861,29 @@ tr:hover {
         flex: 1;
     }
 
+    /* Safari向け特別対応 */
+    @supports (-webkit-touch-callout: none) {
+        .tabs {
+            width: 100vw;
+            margin-left: -10px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .tab {
+            flex: 1 1 auto;
+            -webkit-flex: 1 1 auto;
+            margin: 0 1px;
+            padding: 12px 0;
+            font-size: 14px;
+        }
+    }
+
     .header-buttons {
         gap: 10px;
     }
 
-    /* モバイルのタブスタイル改善 */
+    /* モバイルのタブスタイル改善 - Safari対応 */
     .tabs {
         display: flex;
         justify-content: space-between;
@@ -877,22 +895,39 @@ tr:hover {
         z-index: 100;
         background-color: var(--color-bg-primary);
         width: 100%;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
     }
 
     .tab {
-        flex: 1;
-        margin: 0 3px;
-        padding: 14px 4px;
-        font-size: 16px;
+        flex: 1 1 25%;
+        -webkit-flex: 1 1 25%;
+        margin: 0 2px;
+        padding: 12px 2px;
+        font-size: 15px;
         text-align: center;
         border-radius: 8px 8px 0 0;
         white-space: nowrap;
+        min-width: 0;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
     }
 
     .tab.active {
         background-color: var(--color-primary);
         color: white;
         font-weight: 600;
+        position: relative;
+    }
+
+    .tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--color-primary);
     }
 
     /* フォームのレイアウト調整 */
