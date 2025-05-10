@@ -428,13 +428,28 @@ tr:hover {
     box-shadow: 0 1px 2px var(--color-shadow);
 }
 
+/* タイトル周りのレイアウト */
+.header-container {
+    text-align: center;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.header-container h1 {
+    position: relative;
+    display: inline-block;
+    padding-right: 0;
+    margin-right: 100px; /* ボタン用のスペース */
+}
+
 /* ダークモード切り替えボタン */
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 44px;
-    height: 44px;
+    position: absolute;
+    top: 50%;
+    right: -45px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background-color: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
@@ -450,17 +465,18 @@ tr:hover {
 }
 
 .theme-toggle:hover {
-    transform: rotate(30deg);
+    transform: translateY(-50%) rotate(30deg);
     box-shadow: 0 2px 8px var(--color-shadow-strong);
 }
 
 /* 使い方ボタン */
 .help-button {
-    position: fixed;
-    top: 20px;
-    right: 80px; /* ダークモードボタンの左側に配置 */
-    width: 44px;
-    height: 44px;
+    position: absolute;
+    top: 50%;
+    right: -90px; /* ダークモードボタンの左側に配置 */
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background-color: var(--color-secondary);
     color: white;
@@ -478,7 +494,7 @@ tr:hover {
 }
 
 .help-button:hover {
-    transform: scale(1.1);
+    transform: translateY(-50%) scale(1.1);
     box-shadow: 0 2px 8px var(--color-shadow-strong);
     background-color: var(--color-primary);
 }
@@ -690,19 +706,36 @@ tr:hover {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .header-container h1 {
+        margin-right: 0;
+        padding-right: 0;
+        margin-bottom: 50px;
+        font-size: 24px;
+    }
+
     .theme-toggle {
-        top: 10px;
+        top: 40px;
         right: 10px;
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
+        transform: none;
+    }
+
+    .theme-toggle:hover {
+        transform: rotate(30deg);
     }
 
     .help-button {
-        top: 10px;
+        top: 40px;
         right: 60px;
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         font-size: 16px;
+        transform: none;
+    }
+
+    .help-button:hover {
+        transform: scale(1.1);
     }
 
     /* 履歴項目の調整 */
@@ -734,9 +767,31 @@ tr:hover {
 
 /* スマホ向け調整 */
 @media screen and (max-width: 480px) {
-    h1 {
-        font-size: 24px;
-        margin-bottom: 15px;
+    .header-container {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .header-container h1 {
+        font-size: 22px;
+        margin-bottom: 5px;
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .theme-toggle, .help-button {
+        position: absolute;
+        top: 40px;
+        transform: none;
+    }
+
+    .theme-toggle {
+        right: calc(50% - 20px);
+    }
+
+    .help-button {
+        right: calc(50% - 60px);
     }
 
     .form-grid {
