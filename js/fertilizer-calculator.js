@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPresets();
         
         // モバイルで表示確認
-        if (window.innerWidth <= 480) {
+        if (window.innerWidth <= 767) {
             const presetContainer = document.getElementById('userPresetContainer');
             if (presetContainer) {
                 // コンテナが表示されるように明示的に再計算
@@ -719,7 +719,7 @@ function calculateResults() {
         addToHistory(result);
         
         // モバイルかどうかを検出
-        const isMobile = window.innerWidth <= 480;
+        const isMobile = window.innerWidth <= 767;
         
         // 結果のHTML作成（まだ表示せず）
         let resultHTML = '';
@@ -999,7 +999,7 @@ function displaySavedResult(result) {
     const resultsDiv = document.getElementById('calculationResults');
 
     // モバイルかどうかを検出
-    const isMobile = window.innerWidth <= 480;
+    const isMobile = window.innerWidth <= 767;
 
     // ダークモード機能を削除
     // 文字色の設定
@@ -1347,7 +1347,7 @@ function renderPresets() {
         const npkElem = document.createElement('span');
         npkElem.className = 'preset-npk';
 
-        // NPK値だけをシンプルに表示
+        // NPK値はシンプルに表示
         npkElem.textContent = `${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
 
         // 要素を追加
@@ -1386,7 +1386,7 @@ function renderPresets() {
         const npkElem = document.createElement('span');
         npkElem.className = 'preset-npk';
 
-        // NPK値だけをシンプルに表示
+        // NPK値はシンプルに表示
         npkElem.textContent = `${preset.nitrogen}-${preset.phosphorus}-${preset.potassium}`;
 
         // 要素を追加
@@ -1428,7 +1428,7 @@ function renderPresetLists() {
     window.addEventListener('resize', function() {
         const checkboxes = document.querySelectorAll('.preset-list-item input[type="checkbox"]');
         checkboxes.forEach(checkbox => {
-            if (window.innerWidth <= 480) {
+            if (window.innerWidth <= 767) {
                 checkbox.style.transform = 'scale(0.85)';
             } else {
                 checkbox.style.transform = 'scale(1.1)';
@@ -1454,7 +1454,7 @@ function renderPresetLists() {
 
             // チェックボックス部分
             const checkboxContainer = document.createElement('div');
-            checkboxContainer.style.width = window.innerWidth <= 480 ? '30px' : '40px';
+            checkboxContainer.style.width = window.innerWidth <= 767 ? '30px' : '40px';
             checkboxContainer.style.display = 'flex';
             checkboxContainer.style.alignItems = 'center';
             checkboxContainer.style.justifyContent = 'center';
@@ -1467,7 +1467,7 @@ function renderPresetLists() {
             checkbox.style.marginRight = '15px';
 
             // モバイルかどうかを検出して適切なサイズに
-            if (window.innerWidth <= 480) {
+            if (window.innerWidth <= 767) {
                 checkbox.style.transform = 'scale(0.9)';
                 checkbox.style.marginRight = '8px';
                 checkbox.style.flexShrink = '0';
