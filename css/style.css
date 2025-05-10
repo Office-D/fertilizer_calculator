@@ -864,10 +864,12 @@ tr:hover {
     /* Safari向け特別対応 */
     @supports (-webkit-touch-callout: none) {
         .tabs {
-            width: 100vw;
-            margin-left: -10px;
-            padding-left: 10px;
-            padding-right: 10px;
+            width: 90%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 5px;
+            padding-right: 5px;
         }
 
         .tab {
@@ -886,15 +888,18 @@ tr:hover {
     /* モバイルのタブスタイル改善 - Safari対応 */
     .tabs {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         margin-bottom: 15px;
+        margin-left: auto;
+        margin-right: auto;
         border-bottom: 2px solid var(--color-primary-light);
         padding-bottom: 2px;
         position: sticky;
         top: 0;
         z-index: 100;
         background-color: var(--color-bg-primary);
-        width: 100%;
+        width: 90%;
+        max-width: 400px;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
     }
@@ -903,10 +908,10 @@ tr:hover {
         flex: 1 1 25%;
         -webkit-flex: 1 1 25%;
         margin: 0 2px;
-        padding: 12px 2px;
-        font-size: 15px;
+        padding: 10px 2px;
+        font-size: 14px;
         text-align: center;
-        border-radius: 8px 8px 0 0;
+        border-radius: 6px 6px 0 0;
         white-space: nowrap;
         min-width: 0;
         -webkit-box-sizing: border-box;
