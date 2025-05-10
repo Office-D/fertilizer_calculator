@@ -583,6 +583,20 @@ tr:hover {
     box-shadow: 0 1px 3px var(--color-shadow);
 }
 
+/* モバイル向けのプリセット管理スタイル */
+@media screen and (max-width: 480px) {
+    .preset-list-item {
+        padding: 10px;
+    }
+
+    .preset-list-item input[type="checkbox"] {
+        transform: scale(0.85);
+        margin-right: 8px;
+        flex-shrink: 0;
+        position: relative;
+    }
+}
+
 .preset-visibility-label {
     display: flex;
     align-items: center;
@@ -590,6 +604,7 @@ tr:hover {
     cursor: pointer;
     width: 70%; /* 商品名エリアの幅を統一 */
     color: var(--color-text);
+    overflow: hidden;
 }
 
 .preset-visibility-label span {
@@ -598,6 +613,17 @@ tr:hover {
     white-space: nowrap;
     font-weight: 500;
     color: var(--color-text);
+}
+
+@media screen and (max-width: 480px) {
+    .preset-visibility-label {
+        width: 80%;
+        gap: 5px;
+    }
+
+    .preset-list-item {
+        position: relative;
+    }
 }
 
 .preset-actions {
@@ -681,12 +707,14 @@ tr:hover {
     cursor: pointer;
     box-shadow: 0 2px 4px var(--color-shadow);
     transition: all 0.3s ease;
+    border: 1px solid transparent;
 }
 
 .history-item:hover {
     background-color: var(--color-bg-accent);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px var(--color-shadow-strong);
+    border-color: var(--color-primary-light);
 }
 
 .history-item h4 {
@@ -698,6 +726,25 @@ tr:hover {
     color: var(--color-text-secondary);
     font-size: 14px;
     margin-bottom: 5px;
+}
+
+/* ダークモード特有のスタイリング */
+body.dark-mode .history-item {
+    border-color: var(--color-border);
+}
+
+body.dark-mode .history-item:hover {
+    background-color: #3a3a3a;
+    border-color: var(--color-primary);
+}
+
+body.dark-mode .history-item h4 {
+    color: var(--color-primary-light);
+}
+
+body.dark-mode .history-item:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
 
 /* モバイル対応 */
@@ -895,14 +942,28 @@ tr:hover {
         text-align: center;
         font-weight: bold;
         transition: all 0.3s ease;
+        color: var(--color-text); /* テキスト色を変数に合わせる */
     }
-    
+
+    /* ダークモード用のカード設定 */
+    body.dark-mode .result-card {
+        background-color: #424242;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
     .result-card.highlight {
         background: linear-gradient(135deg, #e9f7ef, #d5f5e3);
         color: #2c7744;
         font-size: 24px;
         padding: 15px;
         box-shadow: 0 3px 8px rgba(44, 119, 68, 0.2);
+    }
+
+    /* ダークモード用のハイライトカード */
+    body.dark-mode .result-card.highlight {
+        background: linear-gradient(135deg, #2e7d32, #388e3c);
+        color: #e8f5e9;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
     }
     
     .result-cards {
@@ -917,16 +978,30 @@ tr:hover {
         margin-bottom: 5px;
         color: var(--color-text-secondary);
     }
-    
+
     .card-value {
         font-size: 16px;
         font-weight: bold;
         margin-bottom: 3px;
+        color: var(--color-primary); /* 値にはプライマリカラーを使用 */
     }
-    
+
     .card-percent {
         font-size: 14px;
         color: var(--color-text-secondary);
+    }
+
+    /* ダークモード用のカードテキスト設定 */
+    body.dark-mode .card-title {
+        color: #bdbdbd; /* より明るいグレー */
+    }
+
+    body.dark-mode .card-value {
+        color: #81c784; /* 明るい緑色 */
+    }
+
+    body.dark-mode .card-percent {
+        color: #bdbdbd; /* より明るいグレー */
     }
 
     /* フォーム要素のタッチ領域拡大 */
