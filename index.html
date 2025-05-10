@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="肥料の含有率と使用量から各栄養素の量を計算するツールです。">
     <title>肥料計算機</title>
     <!-- アクセシビリティ向上のためのフォーカススタイル -->
@@ -679,6 +679,222 @@
             50% { opacity: 1; }
             100% { opacity: 0.7; }
         }
+
+        /* スワイプヒント */
+        .mobile-swipe-hint {
+            display: none;
+            text-align: center;
+            color: var(--color-text-muted);
+            font-style: italic;
+            margin-top: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        /* テーブルのレスポンシブ対応 */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* iOSでのスムーズスクロール */
+            position: relative;
+        }
+
+        /* レスポンシブデザイン用のメディアクエリ */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 6px;
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                padding: 10px;
+                font-size: 14px;
+                flex-grow: 1;
+                min-width: 80px;
+                min-height: 44px; /* タッチ領域の最小高さ */
+            }
+
+            .preset-container {
+                flex-wrap: wrap;
+            }
+
+            .preset-btn {
+                font-size: 12px;
+                padding: 8px 10px;
+                margin-bottom: 5px;
+                flex-grow: 1;
+                min-width: 100px;
+                min-height: 44px; /* タッチしやすく */
+            }
+
+            button {
+                min-height: 44px; /* タッチ領域の最小高さ */
+            }
+
+            input, select {
+                min-height: 44px; /* タッチ領域の最小高さ */
+                font-size: 16px; /* iOSでズームしないための最小フォントサイズ */
+            }
+
+            /* モーダルのサイズ調整 */
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+                margin: 20px auto;
+                max-height: 80vh;
+            }
+
+            /* ダークモードトグルボタンの位置調整 */
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+
+            /* 履歴項目の調整 */
+            .history-item {
+                padding: 10px;
+            }
+
+            .history-item h4 {
+                font-size: 16px;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .control-buttons-left,
+            .control-buttons-right {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* テーブルのスクロール対応 */
+            table {
+                min-width: 600px; /* テーブルの最小幅を設定 */
+            }
+
+            .mobile-swipe-hint {
+                display: block; /* モバイルでのみ表示 */
+                margin-bottom: 10px;
+            }
+
+            /* ラベルをタップしやすく */
+            label {
+                padding: 3px 0;
+                margin-bottom: 8px;
+            }
+
+        }
+
+        /* さらに小さい画面用の調整 */
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+
+            .tab {
+                border-radius: 0;
+                margin-bottom: 1px;
+                padding: 10px;
+                font-size: 16px;
+            }
+
+            .tab:first-child {
+                border-radius: 4px 4px 0 0;
+            }
+
+            .tab:last-child {
+                border-radius: 0 0 4px 4px;
+            }
+
+            button {
+                padding: 12px 15px;
+                font-size: 16px;
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .control-buttons button {
+                margin-right: 0;
+            }
+
+            .preset-btn {
+                width: 100%;
+                margin-right: 0;
+                padding: 12px 10px;
+                font-size: 16px;
+                text-align: left;
+            }
+
+            .preset-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            /* テーブルのスマホ表示 */
+            table {
+                min-width: 480px; /* スマホの横幅に合わせて調整 */
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 6px 4px;
+            }
+
+            /* モーダルの最大高さを調整 */
+            .modal-content {
+                max-height: 90vh;
+                width: 90%;
+                padding: 15px 10px;
+            }
+
+            /* モーダル内フォームの調整 */
+            .add-preset-section .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* 肥料追加ボタンのサイズ調整 */
+            .add-fertilizer-btn {
+                width: 100%;
+                font-size: 18px;
+                padding: 15px;
+            }
+
+            /* フォーム要素のタッチ領域拡大 */
+            input, select, button {
+                touch-action: manipulation; /* ダブルタップによるズームを防止 */
+            }
+
+            /* 入力フォームの余白調整 */
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -831,7 +1047,7 @@
         <div id="fertilizerTab" class="tab-content active" role="tabpanel" aria-labelledby="fertilizerTab-btn">
             <div class="fertilizers-list">
                 <h3 id="fertilizers-heading">追加された肥料</h3>
-                <div style="overflow-x: auto;">
+                <div class="table-responsive">
                     <table id="fertilizerTable" aria-labelledby="fertilizers-heading">
                         <caption class="visually-hidden">追加された肥料の一覧</caption>
                         <thead>
@@ -852,6 +1068,7 @@
                         </tbody>
                     </table>
                 </div>
+                <p class="mobile-swipe-hint">← 横にスワイプできます →</p>
             </div>
         </div>
 
@@ -2016,6 +2233,8 @@
 
         // アプリケーション初期化: UI効果とアクセシビリティ
         document.addEventListener('DOMContentLoaded', function() {
+            // モバイルデバイス対応の初期化
+            initMobileSupport();
             // UI: タブコンテンツが切り替わる際のアニメーションをリセット
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => {
@@ -2206,6 +2425,94 @@
                         document.body.classList.toggle('dark-mode', shouldBeDark);
                         themeToggleBtn.innerText = shouldBeDark ? '🌞' : '🌙';
                     }
+                });
+            }
+        }
+
+        // モバイルデバイス向けの最適化
+        function initMobileSupport() {
+            // iOSでのダブルタップズームを防止
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            // FastClickの実装（タップの遅延を解消）
+            const attachFastClick = function() {
+                const touchElements = document.querySelectorAll('button, .preset-btn, .tab');
+                touchElements.forEach(el => {
+                    let touchStartTime = 0;
+                    let touchStartX = 0;
+                    let touchStartY = 0;
+
+                    el.addEventListener('touchstart', function(e) {
+                        touchStartTime = Date.now();
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                    }, { passive: true });
+
+                    el.addEventListener('touchend', function(e) {
+                        const touchTime = Date.now() - touchStartTime;
+                        const touchEndX = e.changedTouches[0].clientX;
+                        const touchEndY = e.changedTouches[0].clientY;
+                        const touchDistance = Math.sqrt(
+                            Math.pow(touchEndX - touchStartX, 2) +
+                            Math.pow(touchEndY - touchStartY, 2)
+                        );
+
+                        // 短時間タップかつ移動距離が少ない場合にのみクリックと判定
+                        if (touchTime < 300 && touchDistance < 10) {
+                            e.preventDefault();
+                            const clickEvent = new MouseEvent('click', {
+                                view: window,
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            el.dispatchEvent(clickEvent);
+                        }
+                    });
+                });
+            };
+
+            // モバイルデバイスの検出
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                attachFastClick();
+
+                // スワイプヒントのアニメーション
+                const swipeHints = document.querySelectorAll('.mobile-swipe-hint');
+                swipeHints.forEach(hint => {
+                    hint.style.display = 'block';
+                });
+
+                // テーブルのスクロールを分かりやすく
+                const tableContainers = document.querySelectorAll('.table-responsive');
+                tableContainers.forEach(container => {
+                    container.addEventListener('scroll', function() {
+                        // スクロールしたらヒントを隠す
+                        const hint = container.parentNode.querySelector('.mobile-swipe-hint');
+                        if (hint) {
+                            setTimeout(() => {
+                                hint.style.opacity = '0';
+                                setTimeout(() => {
+                                    hint.style.display = 'none';
+                                }, 500);
+                            }, 1000);
+                        }
+                    });
+                });
+
+                // 入力フィールドにフォーカスしたとき、ビューポートを調整
+                const inputFields = document.querySelectorAll('input, select');
+                inputFields.forEach(field => {
+                    field.addEventListener('focus', function() {
+                        // モバイルでキーボードが表示されたときにスクロール位置を調整
+                        setTimeout(() => {
+                            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    });
                 });
             }
         }
