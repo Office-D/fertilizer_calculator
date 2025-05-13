@@ -1119,6 +1119,18 @@ tr:hover {
     /* フォーム要素のタッチ領域拡大 */
     input, select, button {
         min-height: 50px;
+        font-size: 16px; /* モバイルでのフォントサイズをズーム防止のため最適化 */
+    }
+
+    /* 数値入力フィールドの小数点入力を改善 */
+    input[type="text"][inputmode="decimal"] {
+        -webkit-appearance: none;
+        -moz-appearance: textfield;
+        appearance: textfield;
+        text-align: right;
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+        padding-right: 15px;
     }
 
     /* ヘルプコンテンツのスタイル */
@@ -1182,6 +1194,88 @@ body.dark-mode .npk-badge {
     background-color: var(--color-primary-dark);
 }
 
+/* 単位切り替え */
+.unit-switcher {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: var(--color-bg-secondary);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.unit-switcher label {
+    margin-right: 15px;
+    margin-bottom: 0;
+    font-weight: 600;
+    color: var(--color-primary);
+    display: inline-block;
+}
+
+.unit-toggle {
+    display: flex;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    overflow: hidden;
+    background-color: var(--color-bg-primary);
+}
+
+.unit-toggle label {
+    margin: 0;
+    padding: 5px 12px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    transition: all 0.3s ease;
+}
+
+.unit-toggle input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.unit-toggle input:checked + span {
+    background-color: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 2px 10px;
+}
+
+.unit-toggle span {
+    padding: 2px 10px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+/* モバイル対応 */
+@media screen and (max-width: 767px) {
+    .unit-switcher {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 8px 12px;
+        margin-bottom: 15px;
+        width: 100%;
+    }
+
+    .unit-toggle label {
+        padding: 4px 8px;
+        min-width: 36px;
+    }
+
+    .unit-toggle span {
+        font-size: 13px;
+    }
+}
+
 /* リップルエフェクト */
 .ripple {
     position: absolute;
@@ -1217,6 +1311,64 @@ body.dark-mode .npk-badge {
     to {
         transform: scale(1);
         opacity: 1;
+    }
+}
+
+/* インポート・エクスポートセクション */
+.import-export-section {
+    background-color: var(--color-bg-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0 25px 0;
+    box-shadow: 0 2px 6px var(--color-shadow);
+    border-left: 4px solid var(--color-accent);
+}
+
+.import-export-section h3 {
+    color: var(--color-primary-dark);
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.import-export-section p {
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+.import-export-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.export-btn {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+}
+
+.export-btn:hover {
+    background-color: #f57c00;
+}
+
+.import-btn {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.import-btn:hover {
+    background-color: #01579b;
+}
+
+/* モバイル対応 */
+@media screen and (max-width: 767px) {
+    .import-export-buttons {
+        flex-direction: column;
+    }
+
+    .import-export-section {
+        padding: 12px;
+        margin-bottom: 20px;
     }
 }
 

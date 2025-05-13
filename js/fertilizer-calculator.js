@@ -188,14 +188,59 @@ function initMobileSupport() {
     // 入力フィールドのiOS対応
     const numericInputs = document.querySelectorAll('input[type="number"]');
     numericInputs.forEach(input => {
-        // iOSでは入力時に数値キーボードを表示するためpattern属性を追加
-        input.setAttribute('pattern', '[0-9]*');
-        input.setAttribute('inputmode', 'numeric');
-        
+        // 小数点入力のためにdecimalタイプを使用
+        input.setAttribute('inputmode', 'decimal');
+
+        // type="number"を"text"に変更（ブラウザ固有の数値入力制御を回避）
+        input.type = 'text';
+
         // 入力値の検証
-        input.addEventListener('input', function() {
-            // 数値のみを許可
-            this.value = this.value.replace(/[^0-9\.]/g, '');
+        input.addEventListener('input', function(e) {
+            // 現在のカーソル位置を保存
+            const currentPosition = this.selectionStart;
+
+            // 入力値を取得
+            let value = this.value;
+            const originalLength = value.length;
+
+            // 数値と小数点のみを許可
+            value = value.replace(/[^0-9\.]/g, '');
+
+            // 小数点が複数ある場合は最初の小数点だけを残す
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+
+            // 0.1 を 10 と解釈する問題を修正
+            // 先頭が "0" で、次の文字が "." でない場合、0 の後に小数点を追加
+            if (value.length >= 2 && value[0] === '0' && value[1] !== '.') {
+                value = '0.' + value.substring(1);
+            }
+
+            // 値が変更された場合のみ更新
+            if (value !== this.value) {
+                this.value = value;
+
+                // カーソル位置を調整
+                const newPosition = currentPosition + (value.length - originalLength);
+                this.setSelectionRange(Math.max(0, newPosition), Math.max(0, newPosition));
+            }
+        });
+
+        // フォーカスが外れたときに値を整形
+        input.addEventListener('blur', function() {
+            if (this.value === '' || this.value === '.') {
+                this.value = '';
+                return;
+            }
+
+            // 数値フォーマットを整える
+            const num = parseFloat(this.value);
+            if (!isNaN(num)) {
+                // 小数点以下1桁までを表示（必要に応じて変更可能）
+                this.value = num.toFixed(1);
+            }
         });
     });
 }
@@ -207,23 +252,43 @@ function setupEventListeners() {
     if (addFertilizerBtn) {
         addFertilizerBtn.addEventListener('click', addFertilizer);
     }
-    
+
     // 計算ボタン
     const calculateBtn = document.getElementById('calculateBtn');
     if (calculateBtn) {
         calculateBtn.addEventListener('click', calculateResults);
     }
-    
+
     // リセットボタン
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
         resetBtn.addEventListener('click', resetCalculator);
     }
-    
+
     // プリセット管理ボタン
     const managePresetsBtn = document.getElementById('managePresetsBtn');
     if (managePresetsBtn) {
         managePresetsBtn.addEventListener('click', openPresetsModal);
+    }
+
+    // プリセット エクスポートボタン
+    const exportPresetsBtn = document.getElementById('exportPresetsBtn');
+    if (exportPresetsBtn) {
+        exportPresetsBtn.addEventListener('click', exportPresets);
+    }
+
+    // プリセット インポートボタン
+    const importPresetsBtn = document.getElementById('importPresetsBtn');
+    if (importPresetsBtn) {
+        importPresetsBtn.addEventListener('click', function() {
+            document.getElementById('importFileInput').click();
+        });
+    }
+
+    // インポートファイル選択時
+    const importFileInput = document.getElementById('importFileInput');
+    if (importFileInput) {
+        importFileInput.addEventListener('change', importPresets);
     }
 
     // 使い方ボタン
@@ -619,7 +684,7 @@ function calculateResults() {
                 少なくとも1つの肥料を追加してください
             </div>
         `;
-        
+
         // CSS アニメーションの追加
         const style = document.createElement('style');
         style.textContent = `
@@ -630,23 +695,23 @@ function calculateResults() {
             }
         `;
         document.head.appendChild(style);
-        
+
         // エラー表示
         const resultsDiv = document.getElementById('calculationResults');
         resultsDiv.innerHTML = '';
         resultsDiv.appendChild(errorMsg);
-        
+
         // 結果タブに切り替え
         switchTab('resultsTab');
-        
+
         // 5秒後にメッセージを消す
         setTimeout(() => {
             resultsDiv.innerHTML = '<p>まだ肥料が追加されていません</p>';
         }, 5000);
-        
+
         return;
     }
-    
+
     // 計算開始時のローディングエフェクト
     const resultsDiv = document.getElementById('calculationResults');
     resultsDiv.innerHTML = `
@@ -663,7 +728,7 @@ function calculateResults() {
             <p style="margin-top: 15px;">計算中...</p>
         </div>
     `;
-    
+
     // CSSアニメーションの追加
     const style = document.createElement('style');
     style.textContent = `
@@ -673,7 +738,7 @@ function calculateResults() {
         }
     `;
     document.head.appendChild(style);
-    
+
     // 計算を少し遅延させて視覚効果を見せる
     setTimeout(() => {
         // 総使用量と各要素の総量を計算
@@ -688,7 +753,7 @@ function calculateResults() {
         const totalMn = fertilizers.reduce((sum, fert) => sum + fert.mnAmount, 0);
         const totalZn = fertilizers.reduce((sum, fert) => sum + fert.znAmount, 0);
         const totalB = fertilizers.reduce((sum, fert) => sum + fert.bAmount, 0);
-        
+
         // 最終的な含有率を計算
         const finalN = (totalN / totalAmount) * 100;
         const finalP = (totalP / totalAmount) * 100;
@@ -700,7 +765,7 @@ function calculateResults() {
         const finalMn = (totalMn / totalAmount) * 100;
         const finalZn = (totalZn / totalAmount) * 100;
         const finalB = (totalB / totalAmount) * 100;
-        
+
         // 結果オブジェクトを作成
         const result = {
             totalAmount,
@@ -725,95 +790,113 @@ function calculateResults() {
             finalZn,
             finalB
         };
-        
+
         // 履歴に追加
         addToHistory(result);
-        
+
         // モバイルかどうかを検出
         const isMobile = window.innerWidth <= 767;
-        
+
+        // 単位切り替え用のHTMLを作成
+        const unitSwitcherHTML = `
+            <div class="unit-switcher">
+                <label>単位:</label>
+                <div class="unit-toggle">
+                    <label for="unit-g">
+                        <input type="radio" id="unit-g" name="unit" value="g" checked>
+                        <span>g</span>
+                    </label>
+                    <label for="unit-kg">
+                        <input type="radio" id="unit-kg" name="unit" value="kg">
+                        <span>kg</span>
+                    </label>
+                </div>
+            </div>
+        `;
+
         // 結果のHTML作成（まだ表示せず）
         let resultHTML = '';
-        
+
         if (isMobile) {
             // モバイル用のカードレイアウト
             resultHTML = `
             <div class="result-content" style="opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out;">
+                ${unitSwitcherHTML}
                 <div class="mobile-results">
                     <h3>総使用量</h3>
-                    <div class="result-card">
+                    <div class="result-card" data-amount="${totalAmount.toFixed(2)}">
                         ${formatWeight(totalAmount)}
                     </div>
-                    
+
                     <h3>最終NPK比率</h3>
                     <div class="result-card highlight">
                         ${finalN.toFixed(1)}-${finalP.toFixed(1)}-${finalK.toFixed(1)}
                     </div>
-                    
+
                     <h3>主要成分</h3>
                     <div class="result-cards">
                         <div class="result-card">
                             <div class="card-title">窒素 (N)</div>
-                            <div class="card-value">${totalN.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalN.toFixed(2)}">${totalN.toFixed(2)} g</div>
                             <div class="card-percent">${finalN.toFixed(2)}%</div>
                         </div>
                         <div class="result-card">
                             <div class="card-title">リン酸 (P)</div>
-                            <div class="card-value">${totalP.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalP.toFixed(2)}">${totalP.toFixed(2)} g</div>
                             <div class="card-percent">${finalP.toFixed(2)}%</div>
                         </div>
                         <div class="result-card">
                             <div class="card-title">カリウム (K)</div>
-                            <div class="card-value">${totalK.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalK.toFixed(2)}">${totalK.toFixed(2)} g</div>
                             <div class="card-percent">${finalK.toFixed(2)}%</div>
                         </div>
                     </div>
-                    
+
                     <h3>二次栄養素</h3>
                     <div class="result-cards">
                         <div class="result-card">
                             <div class="card-title">カルシウム (Ca)</div>
-                            <div class="card-value">${totalCa.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalCa.toFixed(2)}">${totalCa.toFixed(2)} g</div>
                             <div class="card-percent">${finalCa.toFixed(2)}%</div>
                         </div>
                         <div class="result-card">
                             <div class="card-title">マグネシウム (Mg)</div>
-                            <div class="card-value">${totalMg.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalMg.toFixed(2)}">${totalMg.toFixed(2)} g</div>
                             <div class="card-percent">${finalMg.toFixed(2)}%</div>
                         </div>
                         <div class="result-card">
                             <div class="card-title">硫黄 (S)</div>
-                            <div class="card-value">${totalS.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalS.toFixed(2)}">${totalS.toFixed(2)} g</div>
                             <div class="card-percent">${finalS.toFixed(2)}%</div>
                         </div>
                     </div>
-                    
+
                     <h3>微量栄養素</h3>
                     <div class="result-cards">
                         <div class="result-card">
                             <div class="card-title">鉄 (Fe)</div>
-                            <div class="card-value">${totalFe.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalFe.toFixed(2)}">${totalFe.toFixed(2)} g</div>
                             <div class="card-percent">${finalFe.toFixed(3)}%</div>
                         </div>
                         <div class="result-card">
                             <div class="card-title">マンガン (Mn)</div>
-                            <div class="card-value">${totalMn.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalMn.toFixed(2)}">${totalMn.toFixed(2)} g</div>
                             <div class="card-percent">${finalMn.toFixed(3)}%</div>
                         </div>
                     </div>
                     <div class="result-cards">
                         <div class="result-card">
                             <div class="card-title">亜鉛 (Zn)</div>
-                            <div class="card-value">${totalZn.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalZn.toFixed(2)}">${totalZn.toFixed(2)} g</div>
                             <div class="card-percent">${finalZn.toFixed(3)}%</div>
                         </div>
                         <div class="result-card">
                             <div class="card-title">ホウ素 (B)</div>
-                            <div class="card-value">${totalB.toFixed(2)} g</div>
+                            <div class="card-value" data-amount="${totalB.toFixed(2)}">${totalB.toFixed(2)} g</div>
                             <div class="card-percent">${finalB.toFixed(3)}%</div>
                         </div>
                     </div>
-                    
+
                     <p style="margin-top: 20px; font-style: italic; color: #777;">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
                 </div>
             </div>
@@ -855,6 +938,7 @@ function calculateResults() {
             // デスクトップ用の従来通りのテーブルレイアウト
             resultHTML = `
             <div class="result-content" style="opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out;">
+                ${unitSwitcherHTML}
                 <h3>主要成分</h3>
                 <table>
                     <tr>
@@ -864,10 +948,10 @@ function calculateResults() {
                         <th>カリウム (K)</th>
                     </tr>
                     <tr>
-                        <td>${totalAmount >= 1000 ? (totalAmount / 1000).toFixed(2) + ' kg' : totalAmount.toFixed(1) + ' g'}</td>
-                        <td>${totalN.toFixed(2)} g (${finalN.toFixed(2)}%)</td>
-                        <td>${totalP.toFixed(2)} g (${finalP.toFixed(2)}%)</td>
-                        <td>${totalK.toFixed(2)} g (${finalK.toFixed(2)}%)</td>
+                        <td data-amount="${totalAmount.toFixed(2)}">${formatWeight(totalAmount)}</td>
+                        <td data-amount="${totalN.toFixed(2)}">${totalN.toFixed(2)} g (${finalN.toFixed(2)}%)</td>
+                        <td data-amount="${totalP.toFixed(2)}">${totalP.toFixed(2)} g (${finalP.toFixed(2)}%)</td>
+                        <td data-amount="${totalK.toFixed(2)}">${totalK.toFixed(2)} g (${finalK.toFixed(2)}%)</td>
                     </tr>
                 </table>
 
@@ -879,9 +963,9 @@ function calculateResults() {
                         <th>硫黄 (S)</th>
                     </tr>
                     <tr>
-                        <td>${totalCa.toFixed(2)} g (${finalCa.toFixed(2)}%)</td>
-                        <td>${totalMg.toFixed(2)} g (${finalMg.toFixed(2)}%)</td>
-                        <td>${totalS.toFixed(2)} g (${finalS.toFixed(2)}%)</td>
+                        <td data-amount="${totalCa.toFixed(2)}">${totalCa.toFixed(2)} g (${finalCa.toFixed(2)}%)</td>
+                        <td data-amount="${totalMg.toFixed(2)}">${totalMg.toFixed(2)} g (${finalMg.toFixed(2)}%)</td>
+                        <td data-amount="${totalS.toFixed(2)}">${totalS.toFixed(2)} g (${finalS.toFixed(2)}%)</td>
                     </tr>
                 </table>
 
@@ -894,10 +978,10 @@ function calculateResults() {
                         <th>ホウ素 (B)</th>
                     </tr>
                     <tr>
-                        <td>${totalFe.toFixed(2)} g (${finalFe.toFixed(3)}%)</td>
-                        <td>${totalMn.toFixed(2)} g (${finalMn.toFixed(3)}%)</td>
-                        <td>${totalZn.toFixed(2)} g (${finalZn.toFixed(3)}%)</td>
-                        <td>${totalB.toFixed(2)} g (${finalB.toFixed(3)}%)</td>
+                        <td data-amount="${totalFe.toFixed(2)}">${totalFe.toFixed(2)} g (${finalFe.toFixed(3)}%)</td>
+                        <td data-amount="${totalMn.toFixed(2)}">${totalMn.toFixed(2)} g (${finalMn.toFixed(3)}%)</td>
+                        <td data-amount="${totalZn.toFixed(2)}">${totalZn.toFixed(2)} g (${finalZn.toFixed(3)}%)</td>
+                        <td data-amount="${totalB.toFixed(2)}">${totalB.toFixed(2)} g (${finalB.toFixed(3)}%)</td>
                     </tr>
                 </table>
 
@@ -909,20 +993,23 @@ function calculateResults() {
             </div>
             `;
         }
-        
+
         // 結果を表示してアニメーションを開始
         resultsDiv.innerHTML = resultHTML;
-        
+
+        // 単位切り替えイベントリスナーを追加
+        setupUnitSwitcher();
+
         // 結果タブに切り替え
         switchTab('resultsTab');
-        
+
         // 要素のアニメーション（遅延させて表示）
         setTimeout(() => {
             const resultContent = document.querySelector('.result-content');
             if (resultContent) {
                 resultContent.style.opacity = 1;
                 resultContent.style.transform = 'translateY(0)';
-                
+
                 // NPK比率のスケールアニメーション（デスクトップのみ）
                 if (!isMobile) {
                     setTimeout(() => {
@@ -936,6 +1023,74 @@ function calculateResults() {
             }
         }, 100);
     }, 800); // ローディングを0.8秒表示
+}
+
+// 単位切り替え機能のイベントリスナーを設定
+function setupUnitSwitcher() {
+    const unitGRadio = document.getElementById('unit-g');
+    const unitKgRadio = document.getElementById('unit-kg');
+
+    if (unitGRadio && unitKgRadio) {
+        // g 単位に切り替え
+        unitGRadio.addEventListener('change', function() {
+            if (this.checked) {
+                convertAllUnits('g');
+            }
+        });
+
+        // kg 単位に切り替え
+        unitKgRadio.addEventListener('change', function() {
+            if (this.checked) {
+                convertAllUnits('kg');
+            }
+        });
+    }
+}
+
+// すべての数値の単位を変換する
+function convertAllUnits(targetUnit) {
+    // data-amount属性を持つすべての要素を取得
+    const amountElements = document.querySelectorAll('[data-amount]');
+
+    amountElements.forEach(element => {
+        const amount = parseFloat(element.getAttribute('data-amount'));
+
+        // モバイルビューの場合のカードの特別処理
+        if (element.classList.contains('card-value')) {
+            if (targetUnit === 'kg' && amount >= 1) {
+                element.textContent = (amount / 1000).toFixed(3) + ' kg';
+            } else {
+                element.textContent = amount.toFixed(2) + ' g';
+            }
+        }
+        // テーブルセルの場合（パーセンテージ情報も含める）
+        else if (element.tagName === 'TD') {
+            const percentInfo = element.textContent.match(/\(([^)]+)\)/);
+            const percentText = percentInfo ? ` (${percentInfo[1]})` : '';
+
+            if (targetUnit === 'kg' && amount >= 1) {
+                element.textContent = (amount / 1000).toFixed(3) + ' kg' + percentText;
+            } else {
+                element.textContent = amount.toFixed(2) + ' g' + percentText;
+            }
+        }
+        // 総使用量カードの場合（モバイル）
+        else if (element.classList.contains('result-card')) {
+            if (targetUnit === 'kg') {
+                element.textContent = (amount / 1000).toFixed(2) + ' kg';
+            } else {
+                element.textContent = amount.toFixed(1) + ' g';
+            }
+        }
+        // その他の場合
+        else {
+            if (targetUnit === 'kg' && amount >= 1) {
+                element.textContent = (amount / 1000).toFixed(3) + ' kg';
+            } else {
+                element.textContent = amount.toFixed(2) + ' g';
+            }
+        }
+    });
 }
 
 // 履歴に追加する関数
@@ -1012,10 +1167,26 @@ function displaySavedResult(result) {
     // モバイルかどうかを検出
     const isMobile = window.innerWidth <= 767;
 
-    // ダークモード機能を削除
     // 文字色の設定
     const noteColor = '#777';
     const emphasisColor = 'var(--color-primary-dark)';
+
+    // 単位切り替え用のHTMLを作成
+    const unitSwitcherHTML = `
+        <div class="unit-switcher">
+            <label>単位:</label>
+            <div class="unit-toggle">
+                <label for="unit-g">
+                    <input type="radio" id="unit-g" name="unit" value="g" checked>
+                    <span>g</span>
+                </label>
+                <label for="unit-kg">
+                    <input type="radio" id="unit-kg" name="unit" value="kg">
+                    <span>kg</span>
+                </label>
+            </div>
+        </div>
+    `;
 
     if (isMobile) {
         // NPK比率カードのスタイル
@@ -1023,83 +1194,86 @@ function displaySavedResult(result) {
 
         // モバイル用のレイアウト
         resultsDiv.innerHTML = `
-            <div class="mobile-results">
-                <h3>総使用量</h3>
-                <div class="result-card">
-                    ${result.totalAmount >= 1000 ? (result.totalAmount / 1000).toFixed(2) + ' kg' : result.totalAmount.toFixed(1) + ' g'}
-                </div>
+            <div class="result-content" style="opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out;">
+                ${unitSwitcherHTML}
+                <div class="mobile-results">
+                    <h3>総使用量</h3>
+                    <div class="result-card" data-amount="${result.totalAmount.toFixed(2)}">
+                        ${formatWeight(result.totalAmount)}
+                    </div>
 
-                <h3>最終NPK比率</h3>
-                <div class="result-card highlight" style="${highlightCardStyle}">
-                    ${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}
-                </div>
+                    <h3>最終NPK比率</h3>
+                    <div class="result-card highlight" style="${highlightCardStyle}">
+                        ${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}
+                    </div>
 
-                <h3>主要成分</h3>
-                <div class="result-cards">
-                    <div class="result-card">
-                        <div class="card-title">窒素 (N)</div>
-                        <div class="card-value">${result.totalN.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalN.toFixed(2)}%</div>
+                    <h3>主要成分</h3>
+                    <div class="result-cards">
+                        <div class="result-card">
+                            <div class="card-title">窒素 (N)</div>
+                            <div class="card-value" data-amount="${result.totalN.toFixed(2)}">${result.totalN.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalN.toFixed(2)}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-title">リン酸 (P)</div>
+                            <div class="card-value" data-amount="${result.totalP.toFixed(2)}">${result.totalP.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalP.toFixed(2)}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-title">カリウム (K)</div>
+                            <div class="card-value" data-amount="${result.totalK.toFixed(2)}">${result.totalK.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalK.toFixed(2)}%</div>
+                        </div>
                     </div>
-                    <div class="result-card">
-                        <div class="card-title">リン酸 (P)</div>
-                        <div class="card-value">${result.totalP.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalP.toFixed(2)}%</div>
-                    </div>
-                    <div class="result-card">
-                        <div class="card-title">カリウム (K)</div>
-                        <div class="card-value">${result.totalK.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalK.toFixed(2)}%</div>
-                    </div>
-                </div>
 
-                <h3>二次栄養素</h3>
-                <div class="result-cards">
-                    <div class="result-card">
-                        <div class="card-title">カルシウム (Ca)</div>
-                        <div class="card-value">${result.totalCa.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalCa.toFixed(2)}%</div>
+                    <h3>二次栄養素</h3>
+                    <div class="result-cards">
+                        <div class="result-card">
+                            <div class="card-title">カルシウム (Ca)</div>
+                            <div class="card-value" data-amount="${result.totalCa.toFixed(2)}">${result.totalCa.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalCa.toFixed(2)}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-title">マグネシウム (Mg)</div>
+                            <div class="card-value" data-amount="${result.totalMg.toFixed(2)}">${result.totalMg.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalMg.toFixed(2)}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-title">硫黄 (S)</div>
+                            <div class="card-value" data-amount="${result.totalS.toFixed(2)}">${result.totalS.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalS.toFixed(2)}%</div>
+                        </div>
                     </div>
-                    <div class="result-card">
-                        <div class="card-title">マグネシウム (Mg)</div>
-                        <div class="card-value">${result.totalMg.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalMg.toFixed(2)}%</div>
-                    </div>
-                    <div class="result-card">
-                        <div class="card-title">硫黄 (S)</div>
-                        <div class="card-value">${result.totalS.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalS.toFixed(2)}%</div>
-                    </div>
-                </div>
 
-                <h3>微量栄養素</h3>
-                <div class="result-cards">
-                    <div class="result-card">
-                        <div class="card-title">鉄 (Fe)</div>
-                        <div class="card-value">${result.totalFe.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalFe.toFixed(3)}%</div>
+                    <h3>微量栄養素</h3>
+                    <div class="result-cards">
+                        <div class="result-card">
+                            <div class="card-title">鉄 (Fe)</div>
+                            <div class="card-value" data-amount="${result.totalFe.toFixed(2)}">${result.totalFe.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalFe.toFixed(3)}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-title">マンガン (Mn)</div>
+                            <div class="card-value" data-amount="${result.totalMn.toFixed(2)}">${result.totalMn.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalMn.toFixed(3)}%</div>
+                        </div>
                     </div>
-                    <div class="result-card">
-                        <div class="card-title">マンガン (Mn)</div>
-                        <div class="card-value">${result.totalMn.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalMn.toFixed(3)}%</div>
+                    <div class="result-cards">
+                        <div class="result-card">
+                            <div class="card-title">亜鉛 (Zn)</div>
+                            <div class="card-value" data-amount="${result.totalZn.toFixed(2)}">${result.totalZn.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalZn.toFixed(3)}%</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-title">ホウ素 (B)</div>
+                            <div class="card-value" data-amount="${result.totalB.toFixed(2)}">${result.totalB.toFixed(2)} g</div>
+                            <div class="card-percent">${result.finalB.toFixed(3)}%</div>
+                        </div>
                     </div>
-                </div>
-                <div class="result-cards">
-                    <div class="result-card">
-                        <div class="card-title">亜鉛 (Zn)</div>
-                        <div class="card-value">${result.totalZn.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalZn.toFixed(3)}%</div>
-                    </div>
-                    <div class="result-card">
-                        <div class="card-title">ホウ素 (B)</div>
-                        <div class="card-value">${result.totalB.toFixed(2)} g</div>
-                        <div class="card-percent">${result.finalB.toFixed(3)}%</div>
-                    </div>
-                </div>
 
-                <p style="color: ${noteColor};">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
-                <p><em style="color: ${emphasisColor};">※ この結果は履歴から読み込まれました</em></p>
+                    <p style="color: ${noteColor};">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
+                    <p><em style="color: ${emphasisColor};">※ この結果は履歴から読み込まれました</em></p>
+                </div>
             </div>
         `;
     } else {
@@ -1118,63 +1292,89 @@ function displaySavedResult(result) {
 
         // デスクトップ用の従来通りのテーブルレイアウト
         resultsDiv.innerHTML = `
-            <h3>主要成分</h3>
-            <table>
-                <tr>
-                    <th>総使用量</th>
-                    <th>窒素 (N)</th>
-                    <th>リン酸 (P)</th>
-                    <th>カリウム (K)</th>
-                </tr>
-                <tr>
-                    <td>${formatWeight(result.totalAmount)}</td>
-                    <td>${result.totalN.toFixed(2)} g (${result.finalN.toFixed(2)}%)</td>
-                    <td>${result.totalP.toFixed(2)} g (${result.finalP.toFixed(2)}%)</td>
-                    <td>${result.totalK.toFixed(2)} g (${result.finalK.toFixed(2)}%)</td>
-                </tr>
-            </table>
+            <div class="result-content" style="opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out;">
+                ${unitSwitcherHTML}
+                <h3>主要成分</h3>
+                <table>
+                    <tr>
+                        <th>総使用量</th>
+                        <th>窒素 (N)</th>
+                        <th>リン酸 (P)</th>
+                        <th>カリウム (K)</th>
+                    </tr>
+                    <tr>
+                        <td data-amount="${result.totalAmount.toFixed(2)}">${formatWeight(result.totalAmount)}</td>
+                        <td data-amount="${result.totalN.toFixed(2)}">${result.totalN.toFixed(2)} g (${result.finalN.toFixed(2)}%)</td>
+                        <td data-amount="${result.totalP.toFixed(2)}">${result.totalP.toFixed(2)} g (${result.finalP.toFixed(2)}%)</td>
+                        <td data-amount="${result.totalK.toFixed(2)}">${result.totalK.toFixed(2)} g (${result.finalK.toFixed(2)}%)</td>
+                    </tr>
+                </table>
 
-            <h3>二次栄養素</h3>
-            <table>
-                <tr>
-                    <th>カルシウム (Ca)</th>
-                    <th>マグネシウム (Mg)</th>
-                    <th>硫黄 (S)</th>
-                </tr>
-                <tr>
-                    <td>${result.totalCa.toFixed(2)} g (${result.finalCa.toFixed(2)}%)</td>
-                    <td>${result.totalMg.toFixed(2)} g (${result.finalMg.toFixed(2)}%)</td>
-                    <td>${result.totalS.toFixed(2)} g (${result.finalS.toFixed(2)}%)</td>
-                </tr>
-            </table>
+                <h3>二次栄養素</h3>
+                <table>
+                    <tr>
+                        <th>カルシウム (Ca)</th>
+                        <th>マグネシウム (Mg)</th>
+                        <th>硫黄 (S)</th>
+                    </tr>
+                    <tr>
+                        <td data-amount="${result.totalCa.toFixed(2)}">${result.totalCa.toFixed(2)} g (${result.finalCa.toFixed(2)}%)</td>
+                        <td data-amount="${result.totalMg.toFixed(2)}">${result.totalMg.toFixed(2)} g (${result.finalMg.toFixed(2)}%)</td>
+                        <td data-amount="${result.totalS.toFixed(2)}">${result.totalS.toFixed(2)} g (${result.finalS.toFixed(2)}%)</td>
+                    </tr>
+                </table>
 
-            <h3>微量栄養素</h3>
-            <table>
-                <tr>
-                    <th>鉄 (Fe)</th>
-                    <th>マンガン (Mn)</th>
-                    <th>亜鉛 (Zn)</th>
-                    <th>ホウ素 (B)</th>
-                </tr>
-                <tr>
-                    <td>${result.totalFe.toFixed(2)} g (${result.finalFe.toFixed(3)}%)</td>
-                    <td>${result.totalMn.toFixed(2)} g (${result.finalMn.toFixed(3)}%)</td>
-                    <td>${result.totalZn.toFixed(2)} g (${result.finalZn.toFixed(3)}%)</td>
-                    <td>${result.totalB.toFixed(2)} g (${result.finalB.toFixed(3)}%)</td>
-                </tr>
-            </table>
+                <h3>微量栄養素</h3>
+                <table>
+                    <tr>
+                        <th>鉄 (Fe)</th>
+                        <th>マンガン (Mn)</th>
+                        <th>亜鉛 (Zn)</th>
+                        <th>ホウ素 (B)</th>
+                    </tr>
+                    <tr>
+                        <td data-amount="${result.totalFe.toFixed(2)}">${result.totalFe.toFixed(2)} g (${result.finalFe.toFixed(3)}%)</td>
+                        <td data-amount="${result.totalMn.toFixed(2)}">${result.totalMn.toFixed(2)} g (${result.finalMn.toFixed(3)}%)</td>
+                        <td data-amount="${result.totalZn.toFixed(2)}">${result.totalZn.toFixed(2)} g (${result.finalZn.toFixed(3)}%)</td>
+                        <td data-amount="${result.totalB.toFixed(2)}">${result.totalB.toFixed(2)} g (${result.finalB.toFixed(3)}%)</td>
+                    </tr>
+                </table>
 
-            <div style="${npkResultStyle}">
-                <h3 style="margin-top: 0;">最終NPK比率: <span style="color: ${npkValueColor};">${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}</span></h3>
+                <div class="npk-result" style="${npkResultStyle}">
+                    <h3 style="margin-top: 0;">最終NPK比率: <span style="color: ${npkValueColor};">${result.finalN.toFixed(1)}-${result.finalP.toFixed(1)}-${result.finalK.toFixed(1)}</span></h3>
+                </div>
+
+                <p style="color: ${noteColor}; margin-top: 20px; font-style: italic;">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
+                <p style="color: ${emphasisColor}; font-style: italic;"><em>※ この結果は履歴から読み込まれました</em></p>
             </div>
-
-            <p style="color: ${noteColor}; margin-top: 20px; font-style: italic;">※ 注意: これは肥料の混合総重量に対する各成分の割合です。</p>
-            <p style="color: ${emphasisColor}; font-style: italic;"><em>※ この結果は履歴から読み込まれました</em></p>
         `;
     }
 
     // 結果タブに切り替え
     switchTab('resultsTab');
+
+    // 単位切り替えイベントリスナーを追加
+    setupUnitSwitcher();
+
+    // 要素のアニメーション（遅延させて表示）
+    setTimeout(() => {
+        const resultContent = document.querySelector('.result-content');
+        if (resultContent) {
+            resultContent.style.opacity = 1;
+            resultContent.style.transform = 'translateY(0)';
+
+            // NPK比率のスケールアニメーション（デスクトップのみ）
+            if (!isMobile) {
+                setTimeout(() => {
+                    const npkResult = document.querySelector('.npk-result');
+                    if (npkResult) {
+                        npkResult.style.transform = 'scale(1.05)';
+                        npkResult.style.boxShadow = '0 5px 15px rgba(0,0,0,0.15)';
+                    }
+                }, 500);
+            }
+        }
+    }, 100);
 }
 
 // 計算機をリセットする関数
@@ -1694,6 +1894,135 @@ function formatWeight(weightInGrams) {
     }
 }
 
+// プリセットのエクスポート機能
+function exportPresets() {
+    // エクスポートデータを作成
+    const exportData = {
+        userPresets: userPresets,
+        defaultPresets: defaultPresets.map(preset => ({
+            id: preset.id,
+            isVisible: preset.isVisible
+        }))
+    };
+
+    // JSONデータとして変換
+    const jsonData = JSON.stringify(exportData, null, 2);
+
+    // Blobオブジェクトを作成
+    const blob = new Blob([jsonData], { type: 'application/json' });
+
+    // ダウンロードリンクを作成
+    const downloadLink = document.createElement('a');
+    downloadLink.href = URL.createObjectURL(blob);
+
+    // 現在の日時を取得してファイル名に使用
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
+    downloadLink.download = `肥料計算_プリセット_${dateStr}.json`;
+
+    // リンクをクリックしてダウンロード開始
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    // リンクを削除
+    document.body.removeChild(downloadLink);
+
+    // 通知
+    showToast('プリセットをエクスポートしました');
+}
+
+// プリセットのインポート機能
+function importPresets(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importData = JSON.parse(e.target.result);
+
+            // バリデーション
+            if (!importData.userPresets || !Array.isArray(importData.userPresets)) {
+                throw new Error('ユーザープリセットのデータが無効です');
+            }
+
+            // インポートするか確認
+            if (confirm(`${importData.userPresets.length}個のユーザープリセットをインポートします。よろしいですか？`)) {
+                // 既存のプリセットと重複しないように追加
+                let addedCount = 0;
+                importData.userPresets.forEach(importedPreset => {
+                    // 名前の重複チェック
+                    const isDuplicate = userPresets.some(existingPreset =>
+                        existingPreset.name === importedPreset.name
+                    );
+
+                    // 重複していなければ追加
+                    if (!isDuplicate) {
+                        userPresets.push(importedPreset);
+                        addedCount++;
+                    }
+                });
+
+                // デフォルトプリセットの表示設定もインポート
+                if (importData.defaultPresets && Array.isArray(importData.defaultPresets)) {
+                    importData.defaultPresets.forEach(importedDefault => {
+                        const defaultPreset = defaultPresets.find(p => p.id === importedDefault.id);
+                        if (defaultPreset) {
+                            defaultPreset.isVisible = importedDefault.isVisible;
+                        }
+                    });
+                }
+
+                // 保存してUIを更新
+                localStorage.setItem('userPresets', JSON.stringify(userPresets));
+                localStorage.setItem('defaultPresets', JSON.stringify(defaultPresets));
+                renderPresetLists();
+                renderPresets();
+
+                // 結果を通知
+                showToast(`${addedCount}個のプリセットをインポートしました`);
+            }
+        } catch (error) {
+            console.error('インポートエラー:', error);
+            alert('インポートに失敗しました。ファイル形式が正しくありません。');
+        }
+
+        // ファイル入力をリセット
+        event.target.value = '';
+    };
+
+    reader.onerror = function() {
+        alert('ファイルの読み込みに失敗しました。');
+        event.target.value = '';
+    };
+
+    reader.readAsText(file);
+}
+
+// トースト通知を表示する関数
+function showToast(message) {
+    // 既存のトーストがあれば削除
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+        document.body.removeChild(existingToast);
+    }
+
+    // 新しいトースト要素を作成
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.textContent = message;
+
+    // ページに追加
+    document.body.appendChild(toast);
+
+    // 一定時間後に自動的に削除
+    setTimeout(() => {
+        if (toast.parentNode) {
+            document.body.removeChild(toast);
+        }
+    }, 3000);
+}
+
 // プリセットの表示は renderPresets() 内で直接処理するように変更したため、
 // この関数は削除
 
@@ -1701,12 +2030,12 @@ function formatWeight(weightInGrams) {
 function loadSettings() {
     // デフォルトプリセットを初期化
     initDefaultPresets();
-    
+
     // デフォルトプリセットの表示設定を読み込む
     const savedDefaultPresets = localStorage.getItem('defaultPresets');
     if (savedDefaultPresets) {
         const parsedDefaults = JSON.parse(savedDefaultPresets);
-        
+
         // 既存のデフォルトプリセットの表示状態を更新
         defaultPresets.forEach(preset => {
             const savedPreset = parsedDefaults.find(p => p.id === preset.id);
@@ -1715,13 +2044,13 @@ function loadSettings() {
             }
         });
     }
-    
+
     // ユーザープリセットを読み込む
     const savedUserPresets = localStorage.getItem('userPresets');
     if (savedUserPresets) {
         userPresets = JSON.parse(savedUserPresets);
     }
-    
+
     // 計算履歴を読み込む
     const savedHistory = localStorage.getItem('calculationHistory');
     if (savedHistory) {

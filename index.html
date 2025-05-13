@@ -229,68 +229,78 @@
                 <div id="userPresetList" class="preset-list" role="list" aria-label="カスタムプリセット一覧">
                     <!-- ユーザープリセットのリストがJavaScriptで生成されます -->
                 </div>
-                
+
+                <div class="import-export-section">
+                    <h3>プリセットのインポート・エクスポート</h3>
+                    <p>プリセットのバックアップとしてお使いください。エクスポートしたファイルを保存しておくことで、端末変更時やデータ消失時に復元できます。</p>
+                    <div class="import-export-buttons">
+                        <button id="exportPresetsBtn" class="export-btn">プリセットをエクスポート</button>
+                        <button id="importPresetsBtn" class="import-btn">プリセットをインポート</button>
+                    </div>
+                    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+                </div>
+
                 <h3>新しいプリセットを追加</h3>
                 <div class="add-preset-section">
                     <div class="form-group">
                         <label for="newPresetName">プリセット名 <span aria-hidden="true">*</span></label>
                         <input type="text" id="newPresetName" required aria-required="true">
                     </div>
-                    
+
                     <div class="npk-inputs form-grid">
                         <div class="form-group">
                             <label for="newPresetN">窒素 (N) %</label>
                             <input type="number" id="newPresetN" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetP">リン酸 (P) %</label>
                             <input type="number" id="newPresetP" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetK">カリウム (K) %</label>
                             <input type="number" id="newPresetK" min="0" max="100" step="0.1">
                         </div>
                     </div>
-                    
+
                     <div class="minor-elements-grid">
                         <div class="form-group">
                             <label for="newPresetCa">カルシウム (Ca) %</label>
                             <input type="number" id="newPresetCa" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetMg">マグネシウム (Mg) %</label>
                             <input type="number" id="newPresetMg" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetS">硫黄 (S) %</label>
                             <input type="number" id="newPresetS" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetFe">鉄 (Fe) %</label>
                             <input type="number" id="newPresetFe" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetMn">マンガン (Mn) %</label>
                             <input type="number" id="newPresetMn" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetZn">亜鉛 (Zn) %</label>
                             <input type="number" id="newPresetZn" min="0" max="100" step="0.1">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPresetB">ホウ素 (B) %</label>
                             <input type="number" id="newPresetB" min="0" max="100" step="0.1">
                         </div>
                     </div>
-                    
+
                     <button id="addPresetBtn">プリセットを追加</button>
                 </div>
             </div>
